@@ -31,7 +31,7 @@ export type ParticipantsInfo = {
 };
 
 export type CurrentParticipants = {
-  memberId: number;
+  viewerId: number;
   chzzkNickname: string;
   gameNickname: string;
   fixedPick: boolean;

@@ -64,19 +64,12 @@ export default function Settings() {
       console.log('Res');
       console.log(response);
 
-      if ('error' in response) {
-        // 에러 발생 시 사용자 피드백 제공
-        toast.error(`❌에러코드 : ${response.status} 오류: ${response.error}`, {
-          position: 'top-right',
-          autoClose: 3000,
-        });
-        return;
+      if (response && response.data) {
+        console.log(response.data);
+        setSessionInfo(response.data);
+        toast.success('✅ 세션이 성공적으로 생성되었습니다!');
+        router.push('/streamer/list');
       }
-
-      console.log(response.data);
-      setSessionInfo(response.data);
-      toast.success('✅ 세션이 성공적으로 생성되었습니다!');
-      router.push('/streamer/list');
     } catch (error) {
       console.log('settings error');
       console.error(error);

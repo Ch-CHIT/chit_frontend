@@ -14,7 +14,7 @@ const useThrottle = <T extends (...args: any[]) => void>(
         callback(...args);
       }
     },
-    [callback, delay], // ✅ 최신 상태 유지
+    [delay], // ✅ 최신 상태 유지
   );
 };
 

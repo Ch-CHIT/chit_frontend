@@ -11,6 +11,7 @@ export type StreamerInfo = {
 };
 export type ErrorResponse = {
   status: number;
+  code?: number; //todo : 임시 code추가
   error: string;
   data: string;
 };
@@ -20,9 +21,7 @@ export type CreateContentsSessionRequest = {
   maxGroupParticipants: number;
 };
 
-export type CreateContentsSessionResponse =
-  | ApiResponse<ContentsSession>
-  | ErrorResponse;
+export type CreateContentsSessionResponse = ApiResponse<ContentsSession>;
 
 export type GetContentsSessionResponse =
   | ApiResponse<ContentsSession>

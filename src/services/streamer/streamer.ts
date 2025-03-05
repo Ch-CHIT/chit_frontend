@@ -9,8 +9,9 @@ import {
   PutContentsSessionNextGroupRequest,
   PutContentsSessionNextGroupResponse,
 } from './type';
-import { handleApiError } from '@/lib/error';
-import axiosInstance from '../axios';
+import { handleSessionError } from '@/lib/handleErrors';
+import apiSession from '../axios/apiSession';
+import { SESSION_URLS } from '@/constants/urls';
 
 const client = new ChzzkClient();
 
@@ -83,8 +84,8 @@ export const getContentsSessionInfo = async (
   size: number = 20,
 ): Promise<GetContentsSessionResponse> => {
   try {
-    const response = await axiosInstance.get(
-      `/api/v1/contents/session?page=${page}&size=${size}`,
+    const response = await apiSession.get(
+      `${SESSION_URLS.contentsSession}?page=${page}&size=${size}`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`, // accessToken을 Bearer 토큰으로 추가
@@ -93,7 +94,7 @@ export const getContentsSessionInfo = async (
     );
     return response.data; // 성공적인 응답 데이터 반환
   } catch (error: unknown) {
-    return handleApiError(error); // 에러 핸들링 함수 사용
+    return handleSessionError(error); // 에러 핸들링 함수 사용
   }
 };
 
@@ -104,8 +105,8 @@ export const createContentsSession = async (
 ): Promise<CreateContentsSessionResponse> => {
   console.log(accessToken);
   try {
-    const response = await axiosInstance.post(
-      '/api/v1/contents/session',
+    const response = await apiSession.post(
+      SESSION_URLS.contentsSession,
       {
         ...data,
       },
@@ -117,7 +118,7 @@ export const createContentsSession = async (
     );
     return response.data; // 성공적인 응답 데이터 반환
   } catch (error: unknown) {
-    return handleApiError(error); // 에러 핸들링 함수 사용
+    return Promise.reject(handleSessionError(error)); // 에러 핸들링 함수 사용
   }
 };
 
@@ -127,7 +128,7 @@ export const deleteContentsSession = async (
 ): Promise<DeleteContentsSessionResponse> => {
   console.log(accessToken);
   try {
-    const response = await axiosInstance.delete('/api/v1/contents/session', {
+    const response = await apiSession.delete(SESSION_URLS.contentsSession, {
       headers: {
         Authorization: `Bearer ${accessToken}`, // accessToken을 Bearer 토큰으로 추가
       },
@@ -135,7 +136,7 @@ export const deleteContentsSession = async (
 
     return response.data; // 성공적인 응답 데이터 반환
   } catch (error: unknown) {
-    return handleApiError(error); // 에러 핸들링 함수 사용
+    return handleSessionError(error); // 에러 핸들링 함수 사용
   }
 };
 
@@ -144,10 +145,9 @@ export const putContentsSessionParticipantPick = async (
   accessToken: string,
   viewerId: number,
 ): Promise<DeleteContentsSessionResponse> => {
-  console.log(accessToken);
   try {
-    const response = await axiosInstance.put(
-      `/api/v1/contents/participants/${viewerId}/pick`,
+    const response = await apiSession.put(
+      `${SESSION_URLS.contentsParticipants}${viewerId}/pick`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`, // accessToken을 Bearer 토큰으로 추가
@@ -157,7 +157,7 @@ export const putContentsSessionParticipantPick = async (
 
     return response.data; // 성공적인 응답 데이터 반환
   } catch (error: unknown) {
-    return handleApiError(error); // 에러 핸들링 함수 사용
+    return handleSessionError(error); // 에러 핸들링 함수 사용
   }
 };
 
@@ -167,8 +167,8 @@ export const putContentsSessionNextGroup = async ({
 }: PutContentsSessionNextGroupRequest): Promise<PutContentsSessionNextGroupResponse> => {
   console.log(accessToken);
   try {
-    const response = await axiosInstance.put(
-      `/api/v1/contents/session/next-group`,
+    const response = await apiSession.put(
+      `${SESSION_URLS.contentsSession}/next-group`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`, // accessToken을 Bearer 토큰으로 추가
@@ -178,7 +178,7 @@ export const putContentsSessionNextGroup = async ({
 
     return response.data; // 성공적인 응답 데이터 반환
   } catch (error: unknown) {
-    return handleApiError(error); // 에러 핸들링 함수 사용
+    return handleSessionError(error); // 에러 핸들링 함수 사용
   }
 };
 
@@ -189,8 +189,8 @@ export const deleteContentsSessionParticipant = async (
 ): Promise<DeleteContentsSessionResponse> => {
   console.log(accessToken);
   try {
-    const response = await axiosInstance.delete(
-      `/api/v1/contents/participants/${viewerId}`,
+    const response = await apiSession.delete(
+      `${SESSION_URLS.contentsParticipants}/${viewerId}`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`, // accessToken을 Bearer 토큰으로 추가
@@ -200,6 +200,6 @@ export const deleteContentsSessionParticipant = async (
 
     return response.data; // 성공적인 응답 데이터 반환
   } catch (error: unknown) {
-    return handleApiError(error); // 에러 핸들링 함수 사용
+    return handleSessionError(error); // 에러 핸들링 함수 사용
   }
 };

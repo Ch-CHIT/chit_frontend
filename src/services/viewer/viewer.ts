@@ -1,5 +1,5 @@
-import { handleApiError } from '@/lib/error';
-import axiosInstance from '../axios';
+import { handleSessionError } from '@/lib/handleErrors';
+import apiSession from '../axios/apiSession';
 import {
   DeleteContentSessionViewerLeaveRequest,
   DeleteContentSessionViewerLeaveResponse,
@@ -8,6 +8,7 @@ import {
   GetContentsSessionViewerSubscribeRequest,
 } from './type';
 import makeUrl from '@/lib/makeUrl';
+import { SESSION_URLS } from '@/constants/urls';
 
 //시청자 구독 요청
 export const getContentsSessionViewerSubscribe = async ({
@@ -22,7 +23,7 @@ export const getContentsSessionViewerSubscribe = async ({
       sessionCode,
       viewerNickname: gameNickname,
     });
-    const response = await axiosInstance.get(URL, {
+    const response = await apiSession.get(URL, {
       headers: {
         Authorization: `Bearer ${accessToken}`, // accessToken을 Bearer 토큰으로 추가
       },
@@ -30,7 +31,7 @@ export const getContentsSessionViewerSubscribe = async ({
 
     return response.data; // 성공적인 응답 데이터 반환
   } catch (error: unknown) {
-    return handleApiError(error); // 에러 핸들링 함수 사용
+    return handleSessionError(error); // 에러 핸들링 함수 사용
   }
 };
 
@@ -40,8 +41,8 @@ export const getContentsSessionViewerGameCode = async ({
   accessToken,
 }: GetContentsSessionGameCodeRequest): Promise<GetContentsSessionGameCodeResponse> => {
   try {
-    const url = `/api/v1/contents/session/${sessionCode}/gameCode`;
-    const response = await axiosInstance.get(url, {
+    const url = `${SESSION_URLS.contentsSession}/${sessionCode}/gameCode`;
+    const response = await apiSession.get(url, {
       headers: {
         Authorization: `Bearer ${accessToken}`, // accessToken을 Bearer 토큰으로 추가
       },
@@ -49,7 +50,7 @@ export const getContentsSessionViewerGameCode = async ({
 
     return response.data; // 성공적인 응답 데이터 반환
   } catch (error: unknown) {
-    return handleApiError(error); // 에러 핸들링 함수 사용
+    return handleSessionError(error); // 에러 핸들링 함수 사용
   }
 };
 
@@ -60,8 +61,8 @@ export const deleteContentsSessionViewerLeave = async ({
 }: DeleteContentSessionViewerLeaveRequest): Promise<DeleteContentSessionViewerLeaveResponse> => {
   console.log(accessToken);
   try {
-    const response = await axiosInstance.delete(
-      `/api/v1/contents/session/${sessionCode}/leave`,
+    const response = await apiSession.delete(
+      `${SESSION_URLS.contentsSession}/${sessionCode}/leave`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`, // accessToken을 Bearer 토큰으로 추가
@@ -71,6 +72,6 @@ export const deleteContentsSessionViewerLeave = async ({
 
     return response.data; // 성공적인 응답 데이터 반환
   } catch (error: unknown) {
-    return handleApiError(error); // 에러 핸들링 함수 사용
+    return handleSessionError(error); // 에러 핸들링 함수 사용
   }
 };

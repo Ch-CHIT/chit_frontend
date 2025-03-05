@@ -15,7 +15,7 @@ import useContentsSessionStore, {
 } from '@/store/sessionStore';
 import { useSSEStore } from '@/store/sseStore';
 import useAuthStore from '@/store/store';
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import useThrottle from '@/hooks/useThrottle';
 
@@ -125,7 +125,10 @@ export default function List() {
 
   //이벤트 발생시에만 불러오는 useEffect
   useEffect(() => {
+    console.log('hit2');
+
     if (contentsSessionInfo) {
+      console.log('hit');
       throttledFetchParticipants();
     }
   }, [contentsSessionInfo, throttledFetchParticipants]);
@@ -136,7 +139,6 @@ export default function List() {
       startSSE(url);
     }
   }, [accessToken, isConnected, startSSE]); // ✅ accessToken이 바뀔 때마다 SSE 연결
-
 
   useEffect(() => {
     return () => {
@@ -205,6 +207,9 @@ export default function List() {
                     </div>
                     <div id="partyMembers" className="flex-1 flex-col">
                       <MemberCard
+                        accessToken={accessToken}
+                        refreshUsers={throttledFetchParticipants}
+                        memberId={participant.memberId}
                         zicName={`${participant.chzzkNickname}`}
                         gameNicname={`${participant.gameNickname}`}
                         isHeart={participant.fixedPick}

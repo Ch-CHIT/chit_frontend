@@ -4,7 +4,7 @@ import axios, {
   InternalAxiosRequestConfig,
 } from 'axios';
 
-const axiosInstance: AxiosInstance = axios.create({
+const apiAuth: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL, // API의 기본 URL
   timeout: 1000000,
   headers: {
@@ -12,7 +12,7 @@ const axiosInstance: AxiosInstance = axios.create({
   },
 });
 // 요청 인터셉터
-axiosInstance.interceptors.request.use(
+apiAuth.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // 요청 전 처리 (예: 토큰 추가)
     const accessToken = sessionStorage.getItem('accessToken');
@@ -30,9 +30,9 @@ axiosInstance.interceptors.request.use(
 );
 
 // 응답 인터셉터
-axiosInstance.interceptors.response.use((response: AxiosResponse) => {
+apiAuth.interceptors.response.use((response: AxiosResponse) => {
   // 응답 데이터 가공
   return response;
 });
 
-export default axiosInstance;
+export default apiAuth;

@@ -1,5 +1,5 @@
 const DummyData = {
-  channelId: 'd7ddd7585a271e55159ae47c0ce9a9dd',
+  channelId: '0b33823ac81de48d5b78a38cdbc0ab94',
 };
 
 export default DummyData;

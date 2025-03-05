@@ -1,4 +1,5 @@
 import { AxiosResponse } from 'axios';
+import { ErrorResponse } from '../streamer/type';
 
 export type RequestLoginWithOAuth2 = {
   code: string;
@@ -6,6 +7,8 @@ export type RequestLoginWithOAuth2 = {
   channelId: string;
 };
 
-export type ResponseLoginWithOAuth2 = AxiosResponse & {
-  accessToken: string;
-};
+export type ResponseLoginWithOAuth2 =
+  | (AxiosResponse & {
+      accessToken: string;
+    })
+  | ErrorResponse;
