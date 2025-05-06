@@ -23,12 +23,7 @@ import { heartBeat } from '@/services/common/common';
 import { useRouter } from 'next/navigation';
 import { Result } from '@/services/streamer/type';
 import { logout } from '@/services/auth/auth';
-
-export enum SessionStatus {
-  INITIAL = 1,
-  OPEN = 2,
-  CLOSED = 0,
-}
+import { SessionStatus } from '@/constants/status';
 
 interface getFetchParticipantsDataResponse {
   participants: ParticipantResponseType[];

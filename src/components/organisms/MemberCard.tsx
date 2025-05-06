@@ -29,7 +29,7 @@ export default function MemberCard({
   const onClickPickHandler = async () => {
     if (!accessToken) return;
     const response = await putContentsSessionParticipantPick(accessToken, memberId);
-    if (response.status === 200) {
+    if (response.success) {
       queryClient.refetchQueries({ queryKey: ['participants'] });
     } else {
     }
@@ -40,7 +40,7 @@ export default function MemberCard({
     console.log('asd');
     queryClient.refetchQueries({ queryKey: ['participants'] });
     const response = await deleteContentsSessionParticipant(accessToken, memberId);
-    if (response.status === 200) {
+    if (response.success) {
       refreshUsers();
       console.log('유저를 추방했습니다.');
     } else {
