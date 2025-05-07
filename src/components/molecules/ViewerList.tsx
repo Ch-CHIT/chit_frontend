@@ -89,7 +89,6 @@ export default function ViewerList({ participants, maxGroupParticipants, loadMor
                           return (
                             <MemberCard
                               key={viewer.viewerId}
-                              // refreshUsers={throttledFetchParticipants}
                               refreshUsers={() => {}}
                               memberId={viewer.viewerId}
                               chzzkNickname={`${viewer.chzzkNickname}`}

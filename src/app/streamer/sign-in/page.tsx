@@ -1,3 +1,5 @@
+'use client';
+
 import ChitLogo from '../../../../public/assets/logo/ChitLogo';
 import NaverLogo from '../../../../public/assets/logo/NaverLogo';
 import BtnWithChildren from '@/components/atoms/button/BtnWithChildren';

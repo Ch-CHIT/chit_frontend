@@ -7,7 +7,7 @@ import NaverLogo from '../../../public/assets/logo/NaverLogo';
 
 export default function Home() {
   const onClickLogin = async () => {
-    window.location.href = 'http://localhost:8080/';
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}`;
   };
 
   return (

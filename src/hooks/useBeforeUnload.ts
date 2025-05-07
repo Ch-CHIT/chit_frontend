@@ -1,15 +1,13 @@
-import { SSEStorageKey } from '@/store/sseStore';
 import { useEffect } from 'react';
 import useParamsParser from './useParamsParser';
+import { STORAGE_KEYS } from '@/constants/urls';
 
 const useBeforeUnload = () => {
   useEffect(() => {
     const handleExit = (event: BeforeUnloadEvent) => {
       event.preventDefault();
-      console.log(
-        "🚀 사용자가 'Yes'를 선택하여 페이지를 떠남. sessionStorage 비우기 실행!",
-      );
-      sessionStorage.removeItem(SSEStorageKey);
+      console.log("🚀 사용자가 'Yes'를 선택하여 페이지를 떠남. sessionStorage 비우기 실행!");
+      sessionStorage.removeItem(STORAGE_KEYS.SSEStorageKey);
 
       // ✅ 일부 브라우저에서만 필요한 레거시 코드
       event.returnValue = '';
@@ -39,16 +37,14 @@ const useBeforeUnload = () => {
   }, []);
 };
 
-export const useBackNavigationWarning = (
-  message = '정말 뒤로 가시겠습니까?',
-) => {
+export const useBackNavigationWarning = (message = '정말 뒤로 가시겠습니까?') => {
   const { channelId, sessionCode } = useParamsParser();
   useEffect(() => {
     const handlePopState = () => {
       const userConfirmed = window.confirm(message); // ✅ 뒤로 가기 시 경고창 띄우기
       if (userConfirmed) {
         console.log("🚀 사용자가 'Yes'를 선택! sessionStorage 비우기 실행.");
-        sessionStorage.removeItem(SSEStorageKey); // ✅ "Yes"를 선택하면 sessionStorage 비움
+        sessionStorage.removeItem(STORAGE_KEYS.SSEStorageKey); // ✅ "Yes"를 선택하면 sessionStorage 비움
         window.removeEventListener('popstate', handlePopState); // ✅ 뒤로 가기 방해하지 않도록 이벤트 제거
         window.history.replaceState(null, '', `/${channelId}/${sessionCode}`); // ✅ 히스토리 초기화
       } else {

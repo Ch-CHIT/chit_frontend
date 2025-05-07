@@ -112,7 +112,6 @@ export const createContentsSession = async (
   data: CreateContentsSessionRequest,
   accessToken: string,
 ): Promise<Result<CreateContentsSessionResponse>> => {
-  console.log(accessToken);
   try {
     const response = await sessionClient.post(
       SESSION_URLS.contentsSession,
@@ -121,7 +120,7 @@ export const createContentsSession = async (
       },
       {
         headers: {
-          Authorization: `Bearer ${accessToken}`, // accessToken을 Bearer 토큰으로 추가
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );

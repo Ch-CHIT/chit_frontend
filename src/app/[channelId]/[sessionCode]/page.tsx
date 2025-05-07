@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import CategoryText from '@/components/atoms/text/CategoryText';
@@ -7,21 +9,22 @@ import ViewerPageLayout from '@/components/layout/ViewerPageLayout';
 import { postStreamerInfo } from '@/services/streamer/streamer';
 import StreamerTextLive from '@/components/atoms/text/StreamerTextLive';
 import BtnViewerLogin from '@/components/atoms/button/BtnViewerLogin';
-
 interface PageProps {
-  params: { channelId: string; sessionCode: string };
+  searchParams: Promise<{
+    [key: string]: string;
+  }>;
 }
 
-export default async function Home({ params }: PageProps) {
+export default async function Page({ searchParams }: PageProps) {
   //로그인 되어있는지
-  const { sessionCode, channelId } = params;
+  const { sessionCode, channelId } = await searchParams;
   const streamerInfo = await postStreamerInfo(channelId);
 
   if (!streamerInfo) {
     notFound();
   }
 
-  if (streamerInfo?.status === 'CLOSE') {
+  if (streamerInfo.status === 'CLOSE') {
     return (
       <ViewerPageLayout>
         <section className="flex w-full flex-1 flex-col items-center justify-center">
