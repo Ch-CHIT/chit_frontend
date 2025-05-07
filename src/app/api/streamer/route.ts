@@ -8,10 +8,7 @@ export async function POST(req: Request) {
     const { channelId } = body;
     console.log('post', channelId);
     if (!channelId) {
-      return NextResponse.json(
-        { error: 'channelId is required' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'channelId is required' }, { status: 400 });
     }
 
     const streamerInfo = await getStreamerInfo(channelId);
@@ -24,11 +21,9 @@ export async function POST(req: Request) {
         { status: 404 },
       );
     }
-  } catch (error) {
-    console.error('Error in API handler:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 },
-    );
+  } catch (error: any) {
+    console.error('🔥 Error fetching streamer info:', error);
+    console.error('🔥 Error type:', typeof error, '| message:', error?.message);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

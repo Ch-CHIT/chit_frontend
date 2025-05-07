@@ -14,7 +14,12 @@ import { handleError } from '@/lib/handleErrors';
 import sessionClient from '../_axios/sessionClient';
 import { SESSION_URLS } from '@/constants/urls';
 
-const client = new ChzzkClient();
+const client = new ChzzkClient({
+  baseUrls: {
+    chzzkBaseUrl: 'https://api.chzzk.naver.com',
+    gameBaseUrl: `${process.env.NEXT_PUBLIC_FRONT_API_URL}/api`,
+  },
+});
 
 //치지직 api를 통해 클라이언트 정보 가져오기
 export const getStreamerInfo = async (channelId: string): Promise<StreamerInfo | null> => {
