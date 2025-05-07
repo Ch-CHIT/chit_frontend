@@ -9,10 +9,15 @@ import ViewerPageLayout from '@/components/layout/ViewerPageLayout';
 import { postStreamerInfo } from '@/services/streamer/streamer';
 import StreamerTextLive from '@/components/atoms/text/StreamerTextLive';
 import BtnViewerLogin from '@/components/atoms/button/BtnViewerLogin';
+interface PageProps {
+  searchParams: Promise<{
+    [key: string]: string;
+  }>;
+}
 
-export default async function Home({ params }: any) {
+export default async function Page({ searchParams }: PageProps) {
   //로그인 되어있는지
-  const { sessionCode, channelId } = params;
+  const { sessionCode, channelId } = await searchParams;
   const streamerInfo = await postStreamerInfo(channelId);
 
   if (!streamerInfo) {
