@@ -17,10 +17,9 @@ import { SESSION_URLS } from '@/constants/urls';
 const client = new ChzzkClient({
   baseUrls: {
     chzzkBaseUrl: 'https://api.chzzk.naver.com',
-    gameBaseUrl: `${process.env.NEXT_PUBLIC_FRONT_API_URL}/api`,
+    gameBaseUrl: 'https://comm-api.game.naver.com/nng_main',
   },
 });
-
 //치지직 api를 통해 클라이언트 정보 가져오기
 export const getStreamerInfo = async (channelId: string): Promise<StreamerInfo | null> => {
   try {
@@ -74,6 +73,7 @@ export const postStreamerInfo = async (channelId: string): Promise<StreamerInfo 
     body: JSON.stringify({ channelId }), // channelId를 JSON 형식으로 변환하여 전송
     cache: 'no-store', // ✅ SSR 로딩 감지를 위해 추가!
   }).catch((error) => {
+    console.log('Error fetching streamer info:', error);
     handleFetchError(error);
     throw error;
   });
