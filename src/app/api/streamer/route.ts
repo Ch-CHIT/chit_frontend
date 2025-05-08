@@ -1,5 +1,13 @@
-import { getStreamerInfo } from '@/services/streamer/streamer';
+import { StreamerInfo } from '@/services/streamer/type';
+import { ChzzkClient } from 'chzzk';
 import { NextResponse } from 'next/server';
+
+const client = new ChzzkClient({
+  baseUrls: {
+    chzzkBaseUrl: 'https://api.chzzk.naver.com',
+    gameBaseUrl: 'https://comm-api.game.naver.com/nng_main',
+  },
+});
 
 // POST 요청 처리
 export async function POST(req: Request) {
@@ -10,8 +18,15 @@ export async function POST(req: Request) {
     if (!channelId) {
       return NextResponse.json({ error: 'channelId is required' }, { status: 400 });
     }
-
-    const streamerInfo = await getStreamerInfo(channelId);
+    const liveDetail = await client.live.detail(channelId);
+    console.log(liveDetail);
+    const { status, channel, liveCategory, liveCategoryValue } = liveDetail;
+    const streamerInfo: StreamerInfo = {
+      status,
+      channel,
+      liveCategory,
+      liveCategoryValue,
+    };
 
     if (streamerInfo) {
       return NextResponse.json({ streamerInfo }, { status: 200 });

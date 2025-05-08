@@ -43,10 +43,11 @@ export default function Home() {
     if (isRehydrated) {
       if (!accessToken) {
         setRole('STREAMER');
-        router.push('/login');
+        // router.push('/login');
       } else {
         fetchData();
       }
+      fetchData();
     }
   }, [accessToken, isRehydrated, router, setChannelId, setRole, setStreamerInfo]);
 

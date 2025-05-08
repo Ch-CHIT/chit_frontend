@@ -10,6 +10,10 @@ export default async function AuthInitializer() {
   const ssrClient = createSSRClient(`REFRESH_TOKEN=${REFRESH_TOKEN}`); // 👈 쿠키 직접 전달
 
   try {
+    if (REFRESH_TOKEN === undefined) {
+      console.log('🔴 refreshToken 없음');
+      return <AuthInitializerClient accessToken={null} refreshToken={null} />;
+    }
     const response = await ssrClient.post(DEFAULT_URL + '/auth/refresh'); // 원하는 API 호출
     const accessToken = response.data?.data;
     console.log('debug : refreshToken 재발급');
@@ -17,6 +21,5 @@ export default async function AuthInitializer() {
     return <AuthInitializerClient accessToken={accessToken} refreshToken={REFRESH_TOKEN ?? null} />;
   } catch (err) {
     console.error('🔴 refresh 실패:', err);
-    return <AuthInitializerClient accessToken={null} refreshToken={null} />;
   }
 }
