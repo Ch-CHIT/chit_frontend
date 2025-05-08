@@ -43,7 +43,7 @@ export default function Home() {
     if (isRehydrated) {
       if (!accessToken) {
         setRole('STREAMER');
-        // router.push('/login');
+        router.push('/login');
       } else {
         fetchData();
       }
