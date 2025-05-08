@@ -21,6 +21,11 @@ export async function POST(req: Request) {
     const liveDetail = await client.live.detail(channelId);
     console.log(liveDetail);
     const { status, channel, liveCategory, liveCategoryValue } = liveDetail;
+    if (!liveDetail) {
+      return NextResponse.json({ error: 'No live detail found' }, { status: 404 });
+    }
+    console.log('[DEBUG] liveDetail:', liveDetail);
+
     const streamerInfo: StreamerInfo = {
       status,
       channel,
