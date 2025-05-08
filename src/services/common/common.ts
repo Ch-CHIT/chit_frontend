@@ -29,11 +29,7 @@ export const refreshAccessToken = async (): Promise<
   Result<ApiResponse<RefreshAccessTokenResponse>>
 > => {
   try {
-    const response = await sessionClient.post(
-      `${AUTH_URLS.refresh}`,
-      {},
-      { withCredentials: true },
-    );
+    const response = await sessionClient.post(`${AUTH_URLS.refresh}`);
 
     console.log('debug : refreshToken 재발급');
     console.log(response.data);

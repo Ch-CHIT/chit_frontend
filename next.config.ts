@@ -2,7 +2,18 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
-
+  // rewrites: async () => {
+  //   return [
+  //     {
+  //       source: `/api/v1/:path*`, //frontend api url
+  //       destination: `${process.env.CHZZK_API_URL}/:path*`,
+  //     },
+  //     {
+  //       source: `/api/streamer/:path*`, //frontend api url
+  //       destination: `${process.env.FRONT_API_URL}/:path*`, // 예: https://chit-seven.vercel.app
+  //     },
+  //   ];
+  // },
   webpack: (config) => {
     const fileLoaderRule = config.module.rules.find((rule: any) => rule.test?.test?.('.svg'));
 

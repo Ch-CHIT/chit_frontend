@@ -3,50 +3,42 @@
 import BtnUserProfile from '@/components/atoms/button/BtnUserProfile';
 import useLogout from '@/hooks/useLogout';
 import useParamsParser from '@/hooks/useParamsParser';
-import { refreshAccessToken } from '@/services/common/common';
 import useAuthStore from '@/store/authStore';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
-export default function AuthInitializerClient({ refreshToken }: { refreshToken: string | null }) {
+export default function AuthInitializerClient({
+  accessToken,
+  refreshToken,
+}: {
+  accessToken: string | null;
+  refreshToken: string | null;
+}) {
   const resetLocal = useLogout();
   const { setAccessToken, setLogin, isLogin } = useAuthStore((state) => state);
   const [bootstrapped, setBootstrapped] = useState(false);
   const { channelId, sessionCode } = useParamsParser();
   const router = useRouter();
   //새로고침시에 불러오기
+
+  if (!refreshToken) toast.warn('refresh토큰이 없습니다!');
   useEffect(() => {
-    const restoreAuthState = async () => {
-      try {
-        if (refreshToken && !isLogin) {
-          const res = await refreshAccessToken();
-          console.log('res Debug, bootstrap', res);
-          if (res.success) {
-            const accessToken = res.data.data.data;
-            if (accessToken) {
-              setLogin(true);
-              setAccessToken(accessToken);
-            } else {
-              resetLocal();
-              if (channelId && sessionCode) router.push(`/${channelId}/${sessionCode}`);
-              else {
-                router.push('/');
-              }
-            }
-          } else {
-            resetLocal();
-          }
-        }
-      } catch (error) {
-        console.log('auth bootstrapFaild', error);
+    const init = async () => {
+      if (!isLogin && accessToken) {
+        // ✅ SSR에서 받은 accessToken만 활용
+        setLogin(true);
+        setAccessToken(accessToken);
+      } else if (!isLogin && !accessToken) {
         resetLocal();
-      } finally {
-        setBootstrapped(true);
+        if (channelId && sessionCode) router.push(`/${channelId}/${sessionCode}`);
+        else router.push('/');
       }
+      setBootstrapped(true);
     };
 
-    restoreAuthState();
+    init();
   }, []);
 
   if (!bootstrapped)
