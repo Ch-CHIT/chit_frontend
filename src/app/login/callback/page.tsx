@@ -15,7 +15,7 @@ export default function Page() {
   const code = searchParams.get('code');
   const state = searchParams.get('state');
   const isRehydrated = useAuthStore((state) => state.isRehydrated);
-  const channelId = useChannelStore((state) => state.channelId);
+  const { setChannelId, channelId } = useChannelStore((state) => state);
   const { setLogin, setAccessToken } = useAuthStore((state) => state);
   const router = useRouter();
 
@@ -43,8 +43,10 @@ export default function Page() {
 
       const response = await login(requestData);
       if (!isErrorResponse(response)) {
-        const { accessToken } = response;
+        const { accessToken, channelId } = response;
         console.log('accessToken', accessToken);
+        console.log('channelId', channelId);
+        setChannelId(channelId);
         setAccessToken(accessToken);
         setLogin(true);
       }

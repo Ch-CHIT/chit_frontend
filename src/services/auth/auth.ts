@@ -3,16 +3,20 @@ import authClient from '../_axios/authClient';
 import { RequestLogout } from './type';
 import { AUTH_URLS } from '@/constants/urls';
 import { ErrorResponse } from '../streamer/type';
-
 type loginType = {
   code: string;
   state: string;
+};
+const decodeJwtPayload = (token: string) => {
+  const base64 = token.split('.')[1]; // payload
+  const json = Buffer.from(base64, 'base64').toString('utf-8');
+  return JSON.parse(json);
 };
 
 export const login = async ({
   code: code,
   state: state,
-}: loginType): Promise<{ accessToken: string } | ErrorResponse> => {
+}: loginType): Promise<{ accessToken: string; channelId: string } | ErrorResponse> => {
   try {
     const response = await fetch('/api/login', {
       method: 'POST',
@@ -21,7 +25,11 @@ export const login = async ({
       credentials: 'include', // ✅ 쿠키 보내려면 이거 필요
     });
     const { data } = await response.json();
-    return { accessToken: data }; // 성공적인 응답 데이터 반환
+    const token = data;
+    const payload = decodeJwtPayload(token);
+    console.log('유효한 토큰:', payload);
+
+    return { accessToken: data, channelId: payload.channelId }; // 성공적인 응답 데이터 반환
   } catch (error: any) {
     return handleError(error);
   }
