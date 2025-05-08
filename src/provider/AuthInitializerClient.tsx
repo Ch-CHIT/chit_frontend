@@ -23,8 +23,9 @@ export default function AuthInitializerClient({
   const router = useRouter();
   //새로고침시에 불러오기
 
-  if (!refreshToken) toast.warn('refresh토큰이 없습니다!');
   useEffect(() => {
+    if (!refreshToken && !bootstrapped) toast.warn('refresh토큰이 없습니다!');
+
     const init = async () => {
       if (!isLogin && accessToken) {
         // ✅ SSR에서 받은 accessToken만 활용
