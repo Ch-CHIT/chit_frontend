@@ -1,13 +1,5 @@
 import { StreamerInfo } from '@/services/streamer/type';
-import { ChzzkClient } from 'chzzk';
 import { NextResponse } from 'next/server';
-
-const client = new ChzzkClient({
-  baseUrls: {
-    chzzkBaseUrl: 'https://api.chzzk.naver.com',
-    gameBaseUrl: 'https://comm-api.game.naver.com/nng_main',
-  },
-});
 
 // POST 요청 처리
 export async function POST(req: Request) {
@@ -18,9 +10,27 @@ export async function POST(req: Request) {
     if (!channelId) {
       return NextResponse.json({ error: 'channelId is required' }, { status: 400 });
     }
-    const liveDetail = await client.live.detail(channelId);
-    console.log(liveDetail);
-    const { status, channel, liveCategory, liveCategoryValue } = liveDetail;
+    const liveImage = await fetch(`${process.env.CHZZK_API_URL}/service/v1/channels/${channelId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0',
+      },
+    });
+    const channelInfo = await liveImage.json();
+    const channel = await channelInfo.content;
+    const liveDetail = await fetch(
+      `${process.env.CHZZK_API_URL}/polling/v2/channels/${channelId}/live-status`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+    const data = await liveDetail.json();
+    console.log(data);
+    const { status, liveCategory, liveCategoryValue } = await data.content;
     if (!liveDetail) {
       return NextResponse.json({ error: 'No live detail found' }, { status: 404 });
     }
@@ -28,7 +38,7 @@ export async function POST(req: Request) {
 
     const streamerInfo: StreamerInfo = {
       status,
-      channel,
+      channel: channel,
       liveCategory,
       liveCategoryValue,
     };

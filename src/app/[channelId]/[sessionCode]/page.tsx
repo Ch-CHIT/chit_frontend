@@ -6,11 +6,7 @@ import OFF from '@/components/atoms/label/Off';
 import ViewerPageLayout from '@/components/layout/ViewerPageLayout';
 import { postStreamerInfo } from '@/services/streamer/streamer';
 import StreamerTextLive from '@/components/atoms/text/StreamerTextLive';
-import dynamic from 'next/dynamic';
-
-const BtnViewerLogin = dynamic(() => import('@/components/atoms/button/BtnViewerLogin'), {
-  ssr: false,
-});
+import BtnViewerLogin from '@/components/atoms/button/BtnViewerLogin';
 
 interface PageProps {
   searchParams: Promise<{
