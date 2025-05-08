@@ -24,6 +24,7 @@ const client = new ChzzkClient({
 export const getStreamerInfo = async (channelId: string): Promise<StreamerInfo | null> => {
   try {
     const liveDetail = await client.live.detail(channelId);
+    console.log(liveDetail);
     const { status, channel, liveCategory, liveCategoryValue } = liveDetail;
 
     const resStreamerInfo: StreamerInfo = {
