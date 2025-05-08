@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic';
-
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import CategoryText from '@/components/atoms/text/CategoryText';
@@ -8,7 +6,12 @@ import OFF from '@/components/atoms/label/Off';
 import ViewerPageLayout from '@/components/layout/ViewerPageLayout';
 import { postStreamerInfo } from '@/services/streamer/streamer';
 import StreamerTextLive from '@/components/atoms/text/StreamerTextLive';
-import BtnViewerLogin from '@/components/atoms/button/BtnViewerLogin';
+import dynamic from 'next/dynamic';
+
+const BtnViewerLogin = dynamic(() => import('@/components/atoms/button/BtnViewerLogin'), {
+  ssr: false,
+});
+
 interface PageProps {
   searchParams: Promise<{
     [key: string]: string;
