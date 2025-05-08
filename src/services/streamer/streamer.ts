@@ -64,7 +64,6 @@ const handleFetchError = (error: unknown) => {
 
 //치지직 api에 직접 스트리머 정보 가져오는 api
 export const postStreamerInfo = async (channelId: string): Promise<StreamerInfo | null> => {
-  await new Promise((res) => setTimeout(res, 2000));
   const res = await fetch(`${process.env.NEXT_PUBLIC_FRONT_API_URL}/api/streamer`, {
     method: 'POST', // POST 메소드 사용
     headers: {
@@ -77,6 +76,7 @@ export const postStreamerInfo = async (channelId: string): Promise<StreamerInfo 
     handleFetchError(error);
     throw error;
   });
+  console.log(res);
   if (!res.ok) {
     console.error('스트리머 정보 가져오기 실패');
     return null;
