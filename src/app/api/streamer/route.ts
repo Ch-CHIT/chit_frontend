@@ -38,7 +38,6 @@ export async function POST(req: Request) {
         },
       },
     );
-    const data = await liveDetailResponse.json();
 
     //streamer 방송중이지 않은 기본 타입
     let streamerInfo: StreamerInfo = {
@@ -48,8 +47,10 @@ export async function POST(req: Request) {
       liveCategoryValue: null,
     };
 
+    const data = await liveDetailResponse.json();
+
     //streamer 방송진행중일 때
-    if (data.content !== null) {
+    if (data.content) {
       const { status, liveCategory, liveCategoryValue } = await data.content;
       console.log('[DEBUG] liveDetail:', streamerInfo);
       streamerInfo = {

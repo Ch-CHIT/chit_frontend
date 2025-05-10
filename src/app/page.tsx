@@ -13,7 +13,7 @@ import useChannelStore from '@/store/channelStore';
 import useAuthStore from '@/store/authStore';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import CommonLayout from '@/components/layout/CommonLayout';
 import { toast } from 'react-toastify';
 
@@ -29,34 +29,23 @@ export default function Home() {
     router.push('/streamer/settings');
   };
 
-  const onClickHandler = async () => {
-    if (!channelId) toast.error('채널 아이디가 없습니다.');
-    if (channelId) {
-      const response = await postStreamerInfo(channelId);
-      console.log('response', response);
-
-      if (response) {
-        setStateStreamerInfo(response);
-        setChannelId(response.channel.channelId);
-        setStreamerInfo(response);
-      }
+  const fetchData = useCallback(async () => {
+    if (!channelId) {
+      toast.error('채널 아이디가 없습니다.');
+      return;
     }
-  };
+    const response = await postStreamerInfo(channelId);
+    console.log('response', response);
+
+    if (response) {
+      setStateStreamerInfo(response);
+      setChannelId(response.channel.channelId);
+      setStreamerInfo(response);
+    }
+  }, [channelId, setStateStreamerInfo, setChannelId, setStreamerInfo]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!channelId) toast.error('채널 아이디가 없습니다.');
-      if (channelId) {
-        const response = await postStreamerInfo(channelId);
-        console.log('response', response);
-
-        if (response) {
-          setStateStreamerInfo(response);
-          setChannelId(response.channel.channelId);
-          setStreamerInfo(response);
-        }
-      }
-    };
+    fetchData();
 
     if (isRehydrated) {
       if (!accessToken) {
@@ -67,7 +56,7 @@ export default function Home() {
       }
       fetchData();
     }
-  }, [accessToken, isRehydrated, router, setChannelId, setRole, setStreamerInfo]);
+  }, [accessToken, fetchData, isRehydrated, router, setChannelId, setRole, setStreamerInfo]);
 
   // 로드가 완료될 때까지 로딩 화면 표시
   if (!isRehydrated) {
@@ -104,7 +93,7 @@ export default function Home() {
             {streamerInfo.status === 'OPEN' ? (
               <CategoryText category={streamerInfo.liveCategoryValue || ''}></CategoryText>
             ) : (
-              <RefreshText onClickHandler={onClickHandler} />
+              <RefreshText onClickHandler={fetchData} />
             )}
           </section>
           <BtnWithChildren onClickHandler={onClickCreateSession}>
