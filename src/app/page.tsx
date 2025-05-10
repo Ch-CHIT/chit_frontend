@@ -29,6 +29,20 @@ export default function Home() {
     router.push('/streamer/settings');
   };
 
+  const onClickHandler = async () => {
+    if (!channelId) toast.error('채널 아이디가 없습니다.');
+    if (channelId) {
+      const response = await postStreamerInfo(channelId);
+      console.log('response', response);
+
+      if (response) {
+        setStateStreamerInfo(response);
+        setChannelId(response.channel.channelId);
+        setStreamerInfo(response);
+      }
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       if (!channelId) toast.error('채널 아이디가 없습니다.');
@@ -86,7 +100,7 @@ export default function Home() {
             {streamerInfo.status === 'OPEN' ? (
               <CategoryText category={streamerInfo.liveCategoryValue || ''}></CategoryText>
             ) : (
-              <RefreshText />
+              <RefreshText onClickHandler={onClickHandler} />
             )}
           </section>
           <BtnWithChildren onClickHandler={onClickCreateSession}>
