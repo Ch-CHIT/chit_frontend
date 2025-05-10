@@ -44,11 +44,6 @@ input[type='number']::-webkit-inner-spin-button {
   margin: 0;
 }
 
-/* src/app/globals.css 또는 src/styles/global.css 등 */
-
-@layer utilities {
-}
-
 @media (max-width: 320px) {
   .button-container {
     min-width: 280px; /* 창 너비가 320px 이하일 때 최소 너비 설정 */
