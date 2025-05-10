@@ -1,8 +1,8 @@
 import { handleError } from '@/lib/handleErrors';
-import authClient from '../_axios/authClient';
 import { RequestLogout } from './type';
 import { AUTH_URLS } from '@/constants/urls';
 import { ErrorResponse } from '../streamer/type';
+import sessionClient from '../_axios/sessionClient';
 type loginType = {
   code: string;
   state: string;
@@ -38,7 +38,7 @@ export const login = async ({
 //로그아웃
 export const logout = async ({ accessToken }: RequestLogout) => {
   try {
-    const response = await authClient.post(
+    const response = await sessionClient.post(
       AUTH_URLS.logout,
       {},
       { headers: { Authorization: `Bearer ${accessToken}` } },
