@@ -8,6 +8,7 @@ export async function POST(req: Request) {
     const { channelId } = body;
 
     if (!channelId) {
+      console.error(`[${new Date().toISOString()}] channelId is not defined. Request ID: ${req}`);
       return NextResponse.json({ error: 'channelId is required' }, { status: 400 });
     }
 

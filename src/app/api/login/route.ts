@@ -8,7 +8,8 @@ export const POST = async (req: NextRequest): Promise<Response> => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   if (!apiUrl) {
-    console.error('API URL is not defined.');
+    console.error(`[${new Date().toISOString()}] API URL is not defined. Request ID: ${req}`);
+
     return new Response('API URL is not defined.', { status: 400 });
   }
 

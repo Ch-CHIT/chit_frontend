@@ -32,6 +32,7 @@ export default function Home() {
   const fetchData = useCallback(async () => {
     if (!channelId) {
       toast.error('채널 아이디가 없습니다.');
+      router.push('/login');
       return;
     }
     const response = await postStreamerInfo(channelId);
@@ -42,21 +43,23 @@ export default function Home() {
       setChannelId(response.channel.channelId);
       setStreamerInfo(response);
     }
-  }, [channelId, setStateStreamerInfo, setChannelId, setStreamerInfo]);
+  }, [channelId, router, setChannelId, setStreamerInfo]);
 
   useEffect(() => {
-    fetchData();
+    const init = async () => {
+      await fetchData();
+    };
 
     if (isRehydrated) {
       if (!accessToken) {
         setRole('STREAMER');
         router.push('/login');
       } else {
-        fetchData();
+        init();
       }
-      fetchData();
+      init();
     }
-  }, [accessToken, fetchData, isRehydrated, router, setChannelId, setRole, setStreamerInfo]);
+  }, [accessToken, fetchData, isRehydrated, router, setRole]);
 
   // 로드가 완료될 때까지 로딩 화면 표시
   if (!isRehydrated) {
