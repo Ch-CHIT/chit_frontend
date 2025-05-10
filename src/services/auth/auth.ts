@@ -1,13 +1,13 @@
 import { handleError } from '@/lib/handleErrors';
-import authClient from '../_axios/authClient';
 import { RequestLogout } from './type';
 import { AUTH_URLS } from '@/constants/urls';
 import { ErrorResponse } from '../streamer/type';
+import sessionClient from '../_axios/sessionClient';
 type loginType = {
   code: string;
   state: string;
 };
-const decodeJwtPayload = (token: string) => {
+export const decodeJwtPayload = (token: string) => {
   const base64 = token.split('.')[1]; // payload
   const json = Buffer.from(base64, 'base64').toString('utf-8');
   return JSON.parse(json);
@@ -38,7 +38,7 @@ export const login = async ({
 //로그아웃
 export const logout = async ({ accessToken }: RequestLogout) => {
   try {
-    const response = await authClient.post(
+    const response = await sessionClient.post(
       AUTH_URLS.logout,
       {},
       { headers: { Authorization: `Bearer ${accessToken}` } },

@@ -4,7 +4,16 @@ import { AUTH_URLS } from '@/constants/urls';
 //login 시
 export const POST = async (req: NextRequest): Promise<Response> => {
   const { code, state } = await req.json();
-  const response = await fetch(process.env.SERVER_NEXT_API_URL + AUTH_URLS.login, {
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  if (!apiUrl) {
+    console.error(`[${new Date().toISOString()}] API URL is not defined. Request ID: ${req}`);
+
+    return new Response('API URL is not defined.', { status: 400 });
+  }
+
+  const response = await fetch(process.env.NEXT_PUBLIC_API_URL + AUTH_URLS.login, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ code, state }),

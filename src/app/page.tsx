@@ -7,15 +7,15 @@ import CategoryText from '@/components/atoms/text/CategoryText';
 import RefreshText from '@/components/atoms/text/RefreshText';
 import StreamerTextComment from '@/components/atoms/text/StreamerTextComment';
 import StreamerTextLive from '@/components/atoms/text/StreamerTextLive';
-import DummyData from '@/constants/Dummy';
 import { postStreamerInfo } from '@/services/streamer/streamer';
 import { StreamerInfo } from '@/services/streamer/type';
 import useChannelStore from '@/store/channelStore';
 import useAuthStore from '@/store/authStore';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import CommonLayout from '@/components/layout/CommonLayout';
+import { toast } from 'react-toastify';
 
 export default function Home() {
   const router = useRouter();
@@ -23,21 +23,31 @@ export default function Home() {
   const accessToken = useAuthStore((state) => state.accessToken);
   const isRehydrated = useAuthStore((state) => state.isRehydrated);
   const [streamerInfo, setStateStreamerInfo] = useState<StreamerInfo | null>(null);
-  const setChannelId = useChannelStore((state) => state.setChannelId);
+  const { setChannelId, channelId } = useChannelStore((state) => state);
   const setStreamerInfo = useChannelStore((state) => state.setStreamerInfo);
   const onClickCreateSession = () => {
     router.push('/streamer/settings');
   };
 
+  const fetchData = useCallback(async () => {
+    if (!channelId) {
+      toast.error('채널 아이디가 없습니다.');
+      router.push('/login');
+      return;
+    }
+    const response = await postStreamerInfo(channelId);
+    console.log('response', response);
+
+    if (response) {
+      setStateStreamerInfo(response);
+      setChannelId(response.channel.channelId);
+      setStreamerInfo(response);
+    }
+  }, [channelId, router, setChannelId, setStreamerInfo]);
+
   useEffect(() => {
-    const fetchData = async () => {
-      const dummyChannelId = DummyData.channelId;
-      const response = await postStreamerInfo(dummyChannelId);
-      if (response) {
-        setStateStreamerInfo(response);
-        setChannelId(response.channel.channelId);
-        setStreamerInfo(response);
-      }
+    const init = async () => {
+      await fetchData();
     };
 
     if (isRehydrated) {
@@ -45,15 +55,19 @@ export default function Home() {
         setRole('STREAMER');
         router.push('/login');
       } else {
-        fetchData();
+        init();
       }
-      fetchData();
+      init();
     }
-  }, [accessToken, isRehydrated, router, setChannelId, setRole, setStreamerInfo]);
+  }, [accessToken, fetchData, isRehydrated, router, setRole]);
 
   // 로드가 완료될 때까지 로딩 화면 표시
   if (!isRehydrated) {
-    return <div>Loading...</div>;
+    return (
+      <CommonLayout>
+        <div>Loading...</div>
+      </CommonLayout>
+    );
   }
 
   return (
@@ -65,14 +79,16 @@ export default function Home() {
               <StreamerTextLive isLive={streamerInfo.status}></StreamerTextLive>
               <StreamerTextComment isLive={streamerInfo.status}></StreamerTextComment>
             </div>
-            <Image
-              src={streamerInfo.channel.channelImageUrl || '/tempImage.png'}
-              width={128}
-              height={128}
-              alt="profile"
-              className={`${streamerInfo.status === 'OPEN' ? 'shadow-inset-primary' : 'shadow-inset-disable'} overflow-hidden rounded-full p-[3px]`}
-            />
-
+            <div
+              className={`relative h-32 w-32 overflow-hidden rounded-full p-[3px] ring-4 ${streamerInfo.status === 'OPEN' ? 'ring-primary' : 'ring-disable'}`}
+            >
+              <Image
+                src={streamerInfo.channel.channelImageUrl || '/assets/logo/logo_small.svg'}
+                fill
+                className={`${streamerInfo.channel.channelImageUrl ? 'object-cover' : 'object-contain p-3'}`}
+                alt="profile"
+              />
+            </div>
             <div className="mt-3 flex flex-row items-center justify-center">
               {streamerInfo.status === 'OPEN' ? <Live /> : <OFF />}
               <div className="text-bold-large">{streamerInfo.channel.channelName}</div>
@@ -80,7 +96,7 @@ export default function Home() {
             {streamerInfo.status === 'OPEN' ? (
               <CategoryText category={streamerInfo.liveCategoryValue || ''}></CategoryText>
             ) : (
-              <RefreshText />
+              <RefreshText onClickHandler={fetchData} />
             )}
           </section>
           <BtnWithChildren onClickHandler={onClickCreateSession}>
