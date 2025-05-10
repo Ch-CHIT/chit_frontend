@@ -71,7 +71,11 @@ export default function Home() {
 
   // 로드가 완료될 때까지 로딩 화면 표시
   if (!isRehydrated) {
-    return <div>Loading...</div>;
+    return (
+      <CommonLayout>
+        <div>Loading...</div>
+      </CommonLayout>
+    );
   }
 
   return (
