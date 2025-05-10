@@ -6,20 +6,30 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { channelId } = body;
-    console.log('post', channelId);
+
     if (!channelId) {
       return NextResponse.json({ error: 'channelId is required' }, { status: 400 });
     }
-    const liveImage = await fetch(`${process.env.CHZZK_API_URL}/service/v1/channels/${channelId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0',
+
+    //channelDetailResponse
+    // 채널 상세정보를 가져오기 위한 API 호출
+    const channelDetailResponse = await fetch(
+      `${process.env.CHZZK_API_URL}/service/v1/channels/${channelId}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0',
+        },
       },
-    });
-    const channelInfo = await liveImage.json();
-    const channel = await channelInfo.content;
-    const liveDetail = await fetch(
+    );
+
+    const channelInfo = await channelDetailResponse.json();
+    const channelContent = await channelInfo.content;
+
+    //liveDetailResponse
+    // 방송중인지 확인하기 위한 API 호출
+    const liveDetailResponse = await fetch(
       `${process.env.CHZZK_API_URL}/polling/v2/channels/${channelId}/live-status`,
       {
         method: 'GET',
@@ -28,32 +38,29 @@ export async function POST(req: Request) {
         },
       },
     );
-    const data = await liveDetail.json();
-    console.log(data);
-    if (data.content === null) {
-      return NextResponse.json({ error: 'No live detail found' }, { status: 404 });
-    }
-    const { status, liveCategory, liveCategoryValue } = await data.content;
-    if (!liveDetail) {
-      return NextResponse.json({ error: 'No live detail found' }, { status: 404 });
-    }
-    console.log('[DEBUG] liveDetail:', liveDetail);
+    const data = await liveDetailResponse.json();
 
-    const streamerInfo: StreamerInfo = {
-      status,
-      channel: channel,
-      liveCategory,
-      liveCategoryValue,
+    //streamer 방송중이지 않은 기본 타입
+    let streamerInfo: StreamerInfo = {
+      channel: channelContent,
+      status: 'CLOSE',
+      liveCategory: null,
+      liveCategoryValue: null,
     };
 
-    if (streamerInfo) {
-      return NextResponse.json({ streamerInfo }, { status: 200 });
-    } else {
-      return NextResponse.json(
-        { error: 'Streamer is not live or HLS media not found' },
-        { status: 404 },
-      );
+    //streamer 방송진행중일 때
+    if (data.content !== null) {
+      const { status, liveCategory, liveCategoryValue } = await data.content;
+      console.log('[DEBUG] liveDetail:', streamerInfo);
+      streamerInfo = {
+        status,
+        channel: channelContent,
+        liveCategory,
+        liveCategoryValue,
+      };
     }
+
+    return NextResponse.json({ streamerInfo }, { status: 200 });
   } catch (error: any) {
     console.error('🔥 Error fetching streamer info:', error);
     console.error('🔥 Error type:', typeof error, '| message:', error?.message);

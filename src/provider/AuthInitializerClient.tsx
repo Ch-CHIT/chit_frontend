@@ -7,7 +7,6 @@ import useAuthStore from '@/store/authStore';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
 
 export default function AuthInitializerClient({
   accessToken,
@@ -24,7 +23,10 @@ export default function AuthInitializerClient({
   //새로고침시에 불러오기
 
   useEffect(() => {
-    if (!refreshToken && !bootstrapped) toast.warn('refresh토큰이 없습니다!');
+    if (!refreshToken && !bootstrapped) {
+      console.log('🔴 tokenInitializer  refreshToken 없음');
+      return;
+    }
 
     const init = async () => {
       if (!isLogin && accessToken) {

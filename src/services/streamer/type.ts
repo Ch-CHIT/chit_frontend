@@ -6,8 +6,8 @@ export type StreamerStatusType = 'OPEN' | 'CLOSE';
 export type StreamerInfo = {
   status: StreamerStatusType;
   channel: PartialChannel;
-  liveCategory: string | undefined;
-  liveCategoryValue: string | undefined;
+  liveCategory: string | null;
+  liveCategoryValue: string | null;
 };
 export type ErrorResponse = {
   status: number; //상태코드

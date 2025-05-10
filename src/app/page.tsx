@@ -7,7 +7,6 @@ import CategoryText from '@/components/atoms/text/CategoryText';
 import RefreshText from '@/components/atoms/text/RefreshText';
 import StreamerTextComment from '@/components/atoms/text/StreamerTextComment';
 import StreamerTextLive from '@/components/atoms/text/StreamerTextLive';
-import DummyData from '@/constants/Dummy';
 import { postStreamerInfo } from '@/services/streamer/streamer';
 import { StreamerInfo } from '@/services/streamer/type';
 import useChannelStore from '@/store/channelStore';
@@ -34,7 +33,7 @@ export default function Home() {
     const fetchData = async () => {
       if (!channelId) toast.error('채널 아이디가 없습니다.');
       if (channelId) {
-        const response = await postStreamerInfo(DummyData.channelId);
+        const response = await postStreamerInfo(channelId);
         console.log('response', response);
 
         if (response) {
@@ -70,14 +69,16 @@ export default function Home() {
               <StreamerTextLive isLive={streamerInfo.status}></StreamerTextLive>
               <StreamerTextComment isLive={streamerInfo.status}></StreamerTextComment>
             </div>
-            <Image
-              src={streamerInfo.channel.channelImageUrl || '/tempImage.png'}
-              width={128}
-              height={128}
-              alt="profile"
-              className={`${streamerInfo.status === 'OPEN' ? 'shadow-inset-primary' : 'shadow-inset-disable'} overflow-hidden rounded-full p-[3px]`}
-            />
-
+            <div
+              className={`relative h-32 w-32 overflow-hidden rounded-full p-[3px] ring-4 ${streamerInfo.status === 'OPEN' ? 'ring-primary' : 'ring-disable'}`}
+            >
+              <Image
+                src={streamerInfo.channel.channelImageUrl || '/assets/logo/logo_small.svg'}
+                fill
+                className={`${streamerInfo.channel.channelImageUrl ? 'object-cover' : 'object-contain p-3'}`}
+                alt="profile"
+              />
+            </div>
             <div className="mt-3 flex flex-row items-center justify-center">
               {streamerInfo.status === 'OPEN' ? <Live /> : <OFF />}
               <div className="text-bold-large">{streamerInfo.channel.channelName}</div>
