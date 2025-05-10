@@ -4,7 +4,7 @@ import { AUTH_URLS } from '@/constants/urls';
 //login 시
 export const POST = async (req: NextRequest): Promise<Response> => {
   const { code, state } = await req.json();
-  const response = await fetch(process.env.SERVER_NEXT_API_URL + AUTH_URLS.login, {
+  const response = await fetch(process.env.NEXT_PUBLIC_API_URL + AUTH_URLS.login, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ code, state }),

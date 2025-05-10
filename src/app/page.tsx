@@ -16,6 +16,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import CommonLayout from '@/components/layout/CommonLayout';
+import { toast } from 'react-toastify';
 
 export default function Home() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function Home() {
   const accessToken = useAuthStore((state) => state.accessToken);
   const isRehydrated = useAuthStore((state) => state.isRehydrated);
   const [streamerInfo, setStateStreamerInfo] = useState<StreamerInfo | null>(null);
-  const setChannelId = useChannelStore((state) => state.setChannelId);
+  const { setChannelId, channelId } = useChannelStore((state) => state);
   const setStreamerInfo = useChannelStore((state) => state.setStreamerInfo);
   const onClickCreateSession = () => {
     router.push('/streamer/settings');
@@ -31,12 +32,16 @@ export default function Home() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const dummyChannelId = DummyData.channelId;
-      const response = await postStreamerInfo(dummyChannelId);
-      if (response) {
-        setStateStreamerInfo(response);
-        setChannelId(response.channel.channelId);
-        setStreamerInfo(response);
+      if (!channelId) toast.error('채널 아이디가 없습니다.');
+      if (channelId) {
+        const response = await postStreamerInfo(DummyData.channelId);
+        console.log('response', response);
+
+        if (response) {
+          setStateStreamerInfo(response);
+          setChannelId(response.channel.channelId);
+          setStreamerInfo(response);
+        }
       }
     };
 

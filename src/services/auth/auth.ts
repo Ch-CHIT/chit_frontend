@@ -7,7 +7,7 @@ type loginType = {
   code: string;
   state: string;
 };
-const decodeJwtPayload = (token: string) => {
+export const decodeJwtPayload = (token: string) => {
   const base64 = token.split('.')[1]; // payload
   const json = Buffer.from(base64, 'base64').toString('utf-8');
   return JSON.parse(json);

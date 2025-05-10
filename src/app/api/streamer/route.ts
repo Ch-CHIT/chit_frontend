@@ -30,6 +30,9 @@ export async function POST(req: Request) {
     );
     const data = await liveDetail.json();
     console.log(data);
+    if (data.content === null) {
+      return NextResponse.json({ error: 'No live detail found' }, { status: 404 });
+    }
     const { status, liveCategory, liveCategoryValue } = await data.content;
     if (!liveDetail) {
       return NextResponse.json({ error: 'No live detail found' }, { status: 404 });
