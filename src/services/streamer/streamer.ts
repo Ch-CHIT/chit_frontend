@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { ChzzkClient } from 'chzzk';
 import {
   StreamerInfo,
   GetContentsSessionResponse,
@@ -13,32 +12,6 @@ import {
 import { handleError } from '@/lib/handleErrors';
 import sessionClient from '../_axios/sessionClient';
 import { SESSION_URLS } from '@/constants/urls';
-
-const client = new ChzzkClient({
-  baseUrls: {
-    chzzkBaseUrl: 'https://api.chzzk.naver.com',
-    gameBaseUrl: 'https://comm-api.game.naver.com/nng_main',
-  },
-});
-//치지직 api를 통해 클라이언트 정보 가져오기
-export const getStreamerInfo = async (channelId: string): Promise<StreamerInfo | null> => {
-  try {
-    const liveDetail = await client.live.detail(channelId);
-    console.log(liveDetail);
-    const { status, channel, liveCategory, liveCategoryValue } = liveDetail;
-
-    const resStreamerInfo: StreamerInfo = {
-      status,
-      channel,
-      liveCategory,
-      liveCategoryValue,
-    };
-    return resStreamerInfo;
-  } catch (error) {
-    console.error('Error fetching streamer info:', error);
-    throw new Error('Failed to fetch streamer info');
-  }
-};
 
 const handleFetchError = (error: unknown) => {
   if (axios.isAxiosError(error)) {
