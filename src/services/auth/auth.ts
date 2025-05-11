@@ -41,7 +41,12 @@ export const logout = async ({ accessToken }: RequestLogout) => {
     const response = await sessionClient.post(
       AUTH_URLS.logout,
       {},
-      { headers: { Authorization: `Bearer ${accessToken}` } },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        withCredentials: true,
+      }, // ✅ 쿠키 보내려면 이거 필요,
     );
     console.log(response);
 

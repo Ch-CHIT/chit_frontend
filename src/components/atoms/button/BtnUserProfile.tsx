@@ -24,10 +24,10 @@ const BtnUserProfile = () => {
 
     if (userRole === 'VIEWER' && accessToken) {
       await logout({ accessToken });
-      router.replace(`/${channelId}/${sessionCode}`);
+      window.location.href = `/${channelId}/${sessionCode}`;
     } else if (accessToken) {
       const response = await logout({ accessToken });
-      if (response.status === 200) router.push(`/`);
+      if (response.status === 200) window.location.href = `/`;
     }
   };
 

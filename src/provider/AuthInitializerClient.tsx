@@ -23,12 +23,17 @@ export default function AuthInitializerClient({
   //새로고침시에 불러오기
 
   useEffect(() => {
-    if (!refreshToken && !bootstrapped) {
-      console.log('🔴 tokenInitializer  refreshToken 없음');
-      return;
-    }
-
     const init = async () => {
+      console.log('✅ Init triggered');
+      console.log({ accessToken, refreshToken });
+      console.log('isLogin', isLogin);
+      if (!refreshToken && bootstrapped) {
+        console.log('🔴 tokenInitializer  refreshToken 없음');
+        setBootstrapped(true);
+
+        return;
+      }
+
       if (!isLogin && accessToken) {
         // ✅ SSR에서 받은 accessToken만 활용
         setLogin(true);
@@ -42,12 +47,25 @@ export default function AuthInitializerClient({
     };
 
     init();
-  }, []);
+  }, [
+    accessToken,
+    bootstrapped,
+    channelId,
+    isLogin,
+    refreshToken,
+    resetLocal,
+    router,
+    sessionCode,
+    setAccessToken,
+    setLogin,
+  ]);
 
-  if (!bootstrapped)
-    return <Image src="/assets/loading.svg" alt="loading" width="40" height="40"></Image>;
-  if (!isLogin) {
+  if (!refreshToken) {
+    console.log('🔴 isLogin false');
     return null;
   }
+  if (!bootstrapped)
+    return <Image src="/assets/loading.svg" alt="loading" width="40" height="40"></Image>;
+
   return <BtnUserProfile />;
 }

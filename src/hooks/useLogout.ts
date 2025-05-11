@@ -13,7 +13,7 @@ const useLogout = () => {
     setLogin(false);
     resetSSE();
     resetSession();
-
+    console.log('🔴 로그아웃');
     localStorage.removeItem(STORAGE_KEYS.AuthStorageKey);
     localStorage.removeItem(STORAGE_KEYS.SSEStorageKey);
     localStorage.removeItem(STORAGE_KEYS.SessionStorageKey);
