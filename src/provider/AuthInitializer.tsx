@@ -20,7 +20,7 @@ export default async function AuthInitializer() {
       {},
       { withCredentials: true },
     ); // 원하는 API 호출
-    const accessToken = await response.data?.data;
+    const accessToken = response.data?.data;
     console.log('debug : refreshToken 재발급');
     console.log(response.data);
     return <AuthInitializerClient accessToken={accessToken} refreshToken={REFRESH_TOKEN ?? null} />;

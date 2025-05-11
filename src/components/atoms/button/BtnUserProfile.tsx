@@ -9,25 +9,28 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 const BtnUserProfile = () => {
-  const { role, accessToken } = useAuthStore((state) => state);
+  const { role, accessToken, setAccessToken } = useAuthStore((state) => state);
   const { streamerInfo } = useChannelStore((state) => state);
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
   const { channelId, sessionCode } = useParamsParser();
   const resetLocal = useLogout();
-  const router = useRouter();
   const channelImage =
     streamerInfo?.channel?.channelImageUrl?.trim() || '/assets/logo/logo_small.svg';
   const handleLogout = async () => {
     const userRole = role;
     setIsOpen(false);
-    resetLocal();
 
-    if (userRole === 'VIEWER' && accessToken) {
-      await logout({ accessToken });
-      window.location.href = `/${channelId}/${sessionCode}`;
-    } else if (accessToken) {
-      const response = await logout({ accessToken });
-      if (response.status === 200) window.location.href = `/`;
+    if (accessToken) {
+      await logout({ accessToken }).then(() => {
+        resetLocal();
+        router.refresh();
+        if (userRole === 'STREAMER') {
+          router.push(`/`);
+        } else {
+          router.push(`/${channelId}/${sessionCode}`);
+        }
+      });
     }
   };
 

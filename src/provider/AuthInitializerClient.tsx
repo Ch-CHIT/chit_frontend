@@ -27,21 +27,24 @@ export default function AuthInitializerClient({
       console.log('✅ Init triggered');
       console.log({ accessToken, refreshToken });
       console.log('isLogin', isLogin);
-      if (!refreshToken && bootstrapped) {
+      if (!refreshToken) {
         console.log('🔴 tokenInitializer  refreshToken 없음');
-        setBootstrapped(true);
-
         return;
       }
-
+      if (!accessToken) {
+        console.log('🔴 tokenInitializer  accessToken 없음');
+        setLogin(false);
+        return;
+      }
       if (!isLogin && accessToken) {
         // ✅ SSR에서 받은 accessToken만 활용
         setLogin(true);
         setAccessToken(accessToken);
       } else if (!isLogin && !accessToken) {
         resetLocal();
-        if (channelId && sessionCode) router.push(`/${channelId}/${sessionCode}`);
-        else router.push('/');
+        if (channelId && sessionCode) {
+          router.push(`/${channelId}/${sessionCode}`);
+        } else router.push('/');
       }
       setBootstrapped(true);
     };

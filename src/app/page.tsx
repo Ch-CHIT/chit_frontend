@@ -50,6 +50,7 @@ export default function Home() {
     const init = async () => {
       await fetchData();
     };
+    router.refresh();
 
     if (isRehydrated) {
       if (!accessToken) {

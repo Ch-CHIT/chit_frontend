@@ -29,6 +29,9 @@ export default function Page() {
       const response = await login({
         code: code,
         state: state,
+      }).then((res) => {
+        router.refresh();
+        return res;
       });
 
       if (isErrorResponse(response)) {
@@ -40,13 +43,9 @@ export default function Page() {
       setAccessToken(accessToken);
       setChannelId(newChannelId);
 
-      const targetUrl =
-        ( newChannelId) && sessionCode ? `/${newChannelId}/${sessionCode}` : '/';
+      const targetUrl = newChannelId && sessionCode ? `/${newChannelId}/${sessionCode}` : '/';
 
-       router.refresh();
-
-       router.replace(targetUrl); //2번 케이스 채널 id가 있을 경우
-       router.refresh();
+      router.replace(targetUrl); //2번 케이스 채널 id가 있을 경우
     };
 
     loginAndRedirect();
