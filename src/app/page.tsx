@@ -19,7 +19,7 @@ import { toast } from 'react-toastify';
 
 export default function Home() {
   const router = useRouter();
-  const { isLogin, setRole, setLogin } = useAuthStore((state) => state);
+  const { setRole, setLogin } = useAuthStore((state) => state);
   const accessToken = useAuthStore((state) => state.accessToken);
   const isRehydrated = useAuthStore((state) => state.isRehydrated);
   const [streamerInfo, setStateStreamerInfo] = useState<StreamerInfo | null>(null);
