@@ -22,7 +22,7 @@ export function middleware(request: NextRequest) {
   if (!hasCookie) {
     console.log('Redirect발동');
     if (request.nextUrl.pathname.startsWith('/streamer')) {
-      return NextResponse.redirect(new URL('/', request.url));
+      return NextResponse.redirect(new URL('/login', request.url));
     } else if (!request.nextUrl.pathname.startsWith('/streamer') && segments.length >= 3) {
       const channelId = segments[0];
       const sessionCode = segments[1];

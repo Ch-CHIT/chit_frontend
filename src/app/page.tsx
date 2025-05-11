@@ -19,7 +19,7 @@ import { toast } from 'react-toastify';
 
 export default function Home() {
   const router = useRouter();
-  const setRole = useAuthStore((state) => state.setRole);
+  const { setRole, setLogin } = useAuthStore((state) => state);
   const accessToken = useAuthStore((state) => state.accessToken);
   const isRehydrated = useAuthStore((state) => state.isRehydrated);
   const [streamerInfo, setStateStreamerInfo] = useState<StreamerInfo | null>(null);
@@ -32,7 +32,7 @@ export default function Home() {
   const fetchData = useCallback(async () => {
     if (!channelId) {
       toast.error('채널 아이디가 없습니다.');
-      router.push('/login');
+      router.replace('/login');
       return;
     }
     const response = await postStreamerInfo(channelId);
@@ -42,24 +42,26 @@ export default function Home() {
       setStateStreamerInfo(response);
       setChannelId(response.channel.channelId);
       setStreamerInfo(response);
+      setLogin(true);
     }
-  }, [channelId, router, setChannelId, setStreamerInfo]);
+  }, [channelId, router, setChannelId, setLogin, setStreamerInfo]);
 
   useEffect(() => {
     const init = async () => {
       await fetchData();
     };
+    router.refresh();
 
     if (isRehydrated) {
       if (!accessToken) {
         setRole('STREAMER');
-        router.push('/login');
+        router.replace('/login');
       } else {
+        setLogin(true);
         init();
       }
-      init();
     }
-  }, [accessToken, fetchData, isRehydrated, router, setRole]);
+  }, [accessToken, fetchData, isRehydrated, router, setRole, setLogin]);
 
   // 로드가 완료될 때까지 로딩 화면 표시
   if (!isRehydrated) {
