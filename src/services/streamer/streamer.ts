@@ -101,6 +101,7 @@ export const createContentsSession = async (
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
+        withCredentials: true, // 쿠키를 포함하여 요청
       },
     );
 

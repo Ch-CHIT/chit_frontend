@@ -29,15 +29,21 @@ export default function AuthInitializerClient({
       console.log('isLogin', isLogin);
       if (!refreshToken) {
         console.log('🔴 tokenInitializer  refreshToken 없음');
+        console.log('isLogin', isLogin);
+
         return;
       }
       if (!accessToken) {
         console.log('🔴 tokenInitializer  accessToken 없음');
+        console.log('isLogin', isLogin);
+
         setLogin(false);
         return;
       }
       if (!isLogin && accessToken) {
         // ✅ SSR에서 받은 accessToken만 활용
+        console.log('🔵 tokenInitializer  accessToken 있음');
+        console.log(isLogin);
         setLogin(true);
         setAccessToken(accessToken);
       } else if (!isLogin && !accessToken) {
