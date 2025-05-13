@@ -8,16 +8,18 @@ import { postStreamerInfo } from '@/services/streamer/streamer';
 import StreamerTextLive from '@/components/atoms/text/StreamerTextLive';
 import BtnViewerLogin from '@/components/atoms/button/BtnViewerLogin';
 
-interface PageProps {
-  searchParams: Promise<{
-    [key: string]: string;
-  }>;
-}
-
-export default async function Page({ searchParams }: PageProps) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: { channelId: string; sessionCode: string } }>;
+}) {
   //로그인 되어있는지
-  const { sessionCode, channelId } = await searchParams;
+  console.log('params', params);
+  const { sessionCode, channelId } = (await params).slug;
+  console.log(channelId, sessionCode);
   const streamerInfo = await postStreamerInfo(channelId);
+
+  console.log(streamerInfo);
 
   if (!streamerInfo) {
     notFound();

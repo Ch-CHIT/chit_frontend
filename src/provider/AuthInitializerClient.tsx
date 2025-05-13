@@ -15,8 +15,6 @@ export default function AuthInitializerClient({
   accessToken: string | null;
   refreshToken: string | null;
 }) {
-  const resetLocal = useLogout();
-  const { setAccessToken, setLogin, isLogin } = useAuthStore((state) => state);
   const [bootstrapped, setBootstrapped] = useState(false);
   const { channelId, sessionCode } = useParamsParser();
   const router = useRouter();
@@ -25,47 +23,20 @@ export default function AuthInitializerClient({
   useEffect(() => {
     const init = async () => {
       console.log('✅ Init triggered');
-      console.log({ accessToken, refreshToken });
-      console.log('isLogin', isLogin);
-      if (!refreshToken) {
-        console.log('🔴 tokenInitializer  refreshToken 없음');
-        return;
-      }
       if (!accessToken) {
-        console.log('🔴 tokenInitializer  accessToken 없음');
-        setLogin(false);
-        return;
-      }
-      if (!isLogin && accessToken) {
-        // ✅ SSR에서 받은 accessToken만 활용
-        setLogin(true);
-        setAccessToken(accessToken);
-      } else if (!isLogin && !accessToken) {
-        resetLocal();
         if (channelId && sessionCode) {
           router.push(`/${channelId}/${sessionCode}`);
         } else router.push('/');
       }
-      setBootstrapped(true);
     };
 
     init();
-  }, [
-    accessToken,
-    bootstrapped,
-    channelId,
-    isLogin,
-    refreshToken,
-    resetLocal,
-    router,
-    sessionCode,
-    setAccessToken,
-    setLogin,
-  ]);
+    setBootstrapped(true);
+  }, [accessToken, channelId, router, sessionCode]);
 
-  if (!refreshToken) {
-    console.log('🔴 isLogin false');
-    return null;
+  if (!refreshToken || !accessToken) {
+    console.log('🔴 tokenInitializer  refreshToken 없음');
+    return <div>없음</div>;
   }
   if (!bootstrapped)
     return <Image src="/assets/loading.svg" alt="loading" width="40" height="40"></Image>;

@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 const BtnUserProfile = () => {
-  const { role, accessToken, setAccessToken } = useAuthStore((state) => state);
+  const { role, accessToken, isLogin } = useAuthStore((state) => state);
   const { streamerInfo } = useChannelStore((state) => state);
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
@@ -17,6 +17,8 @@ const BtnUserProfile = () => {
   const resetLocal = useLogout();
   const channelImage =
     streamerInfo?.channel?.channelImageUrl?.trim() || '/assets/logo/logo_small.svg';
+
+  console.log(isLogin);
   const handleLogout = async () => {
     const userRole = role;
     setIsOpen(false);
@@ -37,6 +39,10 @@ const BtnUserProfile = () => {
   const onClickLogoutModal = () => {
     setIsOpen(true);
   };
+
+  if (!isLogin) {
+    return <div></div>;
+  }
 
   return (
     <>
