@@ -151,7 +151,6 @@ export const useSSEStore = create<SSEState>()(
 
           console.log('새로운 SSE연결 시작');
           const newEventSource = new EventSource(url);
-          console.log(newEventSource);
           newEventSource.onopen = (event) => {
             console.log('SSE연결 성공~');
             console.log('연결성공메세지 수신', event);
@@ -168,8 +167,6 @@ export const useSSEStore = create<SSEState>()(
               console.log(`📩 ${eventType} 이벤트 수신:`, JSON.parse(event.data));
               const parsedData = JSON.parse(event.data);
               const { status, data: eventData, message } = parsedData;
-              console.log('hit2');
-              console.log(message);
 
               if (status !== 'OK') throw Error;
               const newState: Partial<SSEState> = {};
@@ -205,7 +202,6 @@ export const useSSEStore = create<SSEState>()(
                     maxGroupParticipants,
                     totalParticipants: currentParticipants || 0,
                   };
-                  console.log(newState.currentParticipants);
                   const newCurrentParticipants = [
                     ...(get().currentParticipants ?? []),
                     participant,
@@ -242,7 +238,6 @@ export const useSSEStore = create<SSEState>()(
                     console.log('updated order:', updated.order);
                     return updated;
                   });
-                  console.log('hit');
                   console.log(newParticipants);
                   break;
                 }
@@ -256,7 +251,6 @@ export const useSSEStore = create<SSEState>()(
                   );
 
                   newState.currentParticipants = [fixedParticipant, ...nonFixedPariticipants];
-
                   console.log('newState');
                   console.log(newState);
                   break;
@@ -316,7 +310,6 @@ export const useSSEStore = create<SSEState>()(
           };
 
           newEventSource.onerror = (isSessionError) => {
-            console.log('onError');
             console.log('SSE오류 발생~', isSessionError);
             newEventSource.close();
             set({ isConnected: false, eventSource: newEventSource, isSessionError: true });

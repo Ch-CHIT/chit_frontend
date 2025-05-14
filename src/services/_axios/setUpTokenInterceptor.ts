@@ -26,13 +26,11 @@ export default function setUpTokenInterceptor(instance: AxiosInstance) {
           if (!isRefreshing) {
             isRefreshing = true;
             const response = await refreshAccessToken();
-            console.log('response');
-            console.log(response);
+
             isRefreshing = false;
             if (response.success) {
               const newAccessToken = response.data.data.data;
-              console.log('hithithithithi');
-              console.log(newAccessToken);
+
               //쿠키 재설정
               originalRequest.headers = {
                 ...originalRequest.headers,

@@ -17,14 +17,13 @@ sessionClient.interceptors.request.use(
     // 요청 전 처리 (예: 토큰 추가)
     const accessToken = sessionStorage.getItem('accessToken');
     if (accessToken) {
-      console.log('axios : ', accessToken);
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
     return config;
   },
   (error) => {
     // 요청 오류 처리
-    console.log('intercepter error');
+    console.error('intercepter error');
     return Promise.reject(error);
   },
 );
@@ -39,8 +38,6 @@ sessionClient.interceptors.response.use(
   (error: AxiosError<ErrorResponse>) => {
     // 요청 오류 처리
     if (axios.isAxiosError(error)) {
-      console.log('response?');
-      console.log(error);
       if (error.response) {
         // 서버에서 응답한 에러
         console.warn('🚨 Server Response:', error.response.data);

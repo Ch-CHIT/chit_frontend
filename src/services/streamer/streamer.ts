@@ -46,11 +46,10 @@ export const postStreamerInfo = async (channelId: string): Promise<StreamerInfo 
     body: JSON.stringify({ channelId }), // channelId를 JSON 형식으로 변환하여 전송
     cache: 'no-store', // ✅ SSR 로딩 감지를 위해 추가!
   }).catch((error) => {
-    console.log('Error fetching streamer info:', error);
+    console.error('Error fetching streamer info:', error);
     handleFetchError(error);
     throw error;
   });
-  console.log(res);
   if (!res.ok) {
     console.error('스트리머 정보 가져오기 실패');
     return null;
@@ -116,7 +115,6 @@ export const updateContentsSession = async (
   data: CreateContentsSessionRequest,
   accessToken: string,
 ): Promise<Result<CreateContentsSessionResponse>> => {
-  console.log(accessToken);
   try {
     const response = await sessionClient.put(
       SESSION_URLS.contentsSession,
@@ -140,7 +138,6 @@ export const updateContentsSession = async (
 export const deleteContentsSession = async (
   accessToken: string,
 ): Promise<Result<DeleteContentsSessionResponse>> => {
-  console.log(accessToken);
   try {
     const response = await sessionClient.delete(SESSION_URLS.contentsSession, {
       headers: {
@@ -180,7 +177,6 @@ export const putContentsSessionParticipantPick = async (
 export const putContentsSessionNextGroup = async ({
   accessToken,
 }: PutContentsSessionNextGroupRequest): Promise<Result<PutContentsSessionNextGroupResponse>> => {
-  console.log(accessToken);
   try {
     const response = await sessionClient.put(
       `${SESSION_URLS.contentsSession}/next-group`,
@@ -203,7 +199,6 @@ export const deleteContentsSessionParticipant = async (
   accessToken: string,
   viewerId: number,
 ): Promise<Result<DeleteContentsSessionResponse>> => {
-  console.log(accessToken);
   try {
     const response = await sessionClient.delete(
       `${SESSION_URLS.contentsParticipants}/${viewerId}`,

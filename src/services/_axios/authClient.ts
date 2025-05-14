@@ -14,14 +14,13 @@ authClient.interceptors.request.use(
     // 요청 전 처리 (예: 토큰 추가)
     const accessToken = sessionStorage.getItem('accessToken');
     if (accessToken) {
-      console.log('axios : ', accessToken);
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
     return config;
   },
   (error) => {
     // 요청 오류 처리
-    console.log('intercepter error');
+    console.error('intercepter error');
     return Promise.reject(error);
   },
 );

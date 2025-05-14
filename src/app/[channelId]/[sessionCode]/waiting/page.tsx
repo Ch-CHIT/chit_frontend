@@ -54,7 +54,6 @@ export default function Page() {
   };
 
   useEffect(() => {
-    console.log(viewerStatus);
     if (viewerStatus === ViewerStatus.KICKED) {
       toast.success('시참에서 강퇴처리되었습니다.');
       router.replace(parentPath + '/ban');
@@ -68,17 +67,11 @@ export default function Page() {
 
   //gameCode event처리
   useEffect(() => {
-    console.log(viewerSessionInfo?.gameParticipationCode);
     setGameCode(viewerSessionInfo?.gameParticipationCode ?? null);
   }, [isViewerInfoLoading, viewerSessionInfo]);
 
   //rerender
-  useEffect(() => {
-    console.log(isTokenLoading);
-    console.log(streamerInfo);
-    console.log(viewerSessionInfo);
-    console.log(isViewerInfoLoading);
-  }, [isTokenLoading, streamerInfo, viewerSessionInfo, isViewerInfoLoading]);
+  useEffect(() => {}, [isTokenLoading, streamerInfo, viewerSessionInfo, isViewerInfoLoading]);
 
   useEffect(() => {
     // 처음 한 번 실행
@@ -97,7 +90,6 @@ export default function Page() {
 
     const intervalId = setInterval(() => {
       if (sessionCode && accessToken) heartBeat(accessToken, sessionCode);
-      console.log('ping');
     }, 10000); // 10초
 
     // 언마운트될 때 인터벌 정리

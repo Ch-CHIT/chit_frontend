@@ -47,7 +47,6 @@ const fetchParticipantsData = async ({
   const page = pageParam as number;
 
   if (!accessToken) {
-    console.log('token이 없습니다.');
     return { success: false, error: { status: 400, code: 400, message: 'accessToken이 없습니다' } };
   }
   const response = await getContentsSessionInfo({ page, accessToken, size });
@@ -56,7 +55,6 @@ const fetchParticipantsData = async ({
     return { success: false, error: response.error };
   }
 
-  console.log('fetchParticipantsdata 정보', response.data.data.participants?.content);
   return {
     success: true,
     data: {
@@ -141,19 +139,14 @@ export default function List() {
       toast.warn('접근 토큰이 필요합니다. 잠시 후 다시 시도해주세요');
       return;
     }
-    try {
-      const response = await putContentsSessionNextGroup({ accessToken });
-      if (response.success) {
-        toast.success('다음 파티를 호출 했습니다.');
-        queryClient.setQueryData(['participants'], () => ({
-          pages: [],
-          pageParams: [0],
-        })); // participants 호출
-        queryClient.refetchQueries({ queryKey: ['participants'] }); // 쿼리 재요청 (첫 페이지부터)
-      }
-      console.log(response);
-    } catch (err) {
-      console.log(err);
+    const response = await putContentsSessionNextGroup({ accessToken });
+    if (response.success) {
+      toast.success('다음 파티를 호출 했습니다.');
+      queryClient.setQueryData(['participants'], () => ({
+        pages: [],
+        pageParams: [0],
+      })); // participants 호출
+      queryClient.refetchQueries({ queryKey: ['participants'] }); // 쿼리 재요청 (첫 페이지부터)
     }
   };
 
@@ -171,7 +164,6 @@ export default function List() {
             // 기존 + 새 participants 통합 후 필터링
 
             const currentIds = new Set(currentParticipants.map((p) => p.viewerId));
-            console.log('currentIds', currentIds);
             const oldParticipants = oldData.pages.flatMap((page: any) => page.participants || []);
             // 기존 참가자 중 current에 아직 남아 있는 유저만 유지 (나간 유저 제거 및 중복삭제)
             newParticipants = oldParticipants.filter((p) => currentIds.has(p.viewerId) === false); // current에 없는 유저만 유지해서 중복 제거
@@ -200,8 +192,6 @@ export default function List() {
   }, [currentParticipants, queryClient]);
 
   const participants = useMemo(() => {
-    console.log('참가자');
-
     let filteredParticipants = data?.pages.flatMap((p) => p.participants || []) ?? [];
     if (filteredParticipants.length > 0) {
       if (menu === 1) {
@@ -231,7 +221,6 @@ export default function List() {
 
       const intervalId = setInterval(() => {
         heartBeat(accessToken, sessionCode);
-        console.log('ping');
       }, 10000); // 10초
 
       return () => {
@@ -356,8 +345,6 @@ export default function List() {
     startSSE,
     isSessionOn,
   ]);
-
-  console.log(participants);
 
   if (!isTokenLoading) return <div>로딩중입니다.</div>;
   const maxGroupParticipants = sessionInfo?.maxGroupParticipants ?? 1;

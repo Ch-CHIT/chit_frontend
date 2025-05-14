@@ -37,7 +37,6 @@ export default function Home() {
       return;
     }
     const response = await postStreamerInfo(channelId);
-    console.log('response', response);
 
     if (response) {
       setStateStreamerInfo(response);
