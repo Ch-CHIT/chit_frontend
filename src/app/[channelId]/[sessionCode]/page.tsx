@@ -8,11 +8,11 @@ import StreamerTextLive from '@/components/atoms/text/StreamerTextLive';
 import BtnViewerLogin from '@/components/atoms/button/BtnViewerLogin';
 import BigProfileImg from '@/components/atoms/profile/BigProfileImg';
 
-type Params = Promise<{ params: { channelId: string; sessionCode: string } }>;
+type Params = { params: Promise<{ channelId: string; sessionCode: string }> };
 
 export default async function Page(props: Params) {
-  const { params } = await props;
-  const { channelId, sessionCode } = params;
+  const { params } = props;
+  const { channelId, sessionCode } = await params;
   const streamerInfo = await postStreamerInfo(channelId);
 
   if (!streamerInfo) {
