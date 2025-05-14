@@ -71,7 +71,7 @@ const useContentsSessionStore = create<ContentsSessionState & ContentsSessionAct
 
       {
         name: STORAGE_KEYS.SessionStorageKey,
-        storage: createJSONStorage(() => localStorage),
+        storage: createJSONStorage(() => sessionStorage),
         partialize: (state) => ({
           sessionInfo: state.sessionInfo,
         }),
