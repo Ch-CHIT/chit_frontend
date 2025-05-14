@@ -18,7 +18,6 @@ const BtnUserProfile = () => {
   const channelImage =
     streamerInfo?.channel?.channelImageUrl?.trim() || '/assets/logo/logo_small.svg';
 
-  console.log(isLogin);
   const handleLogout = async () => {
     const userRole = role;
     setIsOpen(false);

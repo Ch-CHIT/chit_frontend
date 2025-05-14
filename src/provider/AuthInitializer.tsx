@@ -1,4 +1,4 @@
-import { cookies, headers } from 'next/headers';
+import { cookies } from 'next/headers';
 import AuthInitializerClient from './AuthInitializerClient';
 import { createSSRClient } from '@/services/_axios/ssrClient';
 import { DEFAULT_URL } from '@/constants/urls';
@@ -6,10 +6,8 @@ import { DEFAULT_URL } from '@/constants/urls';
 export default async function AuthInitializer() {
   const cookieStore = await cookies();
   const REFRESH_TOKEN = cookieStore.get('REFRESH_TOKEN')?.value;
-  console.log('refreshhhh', REFRESH_TOKEN);
   const ssrClient = createSSRClient(`REFRESH_TOKEN=${REFRESH_TOKEN}`); // 👈 쿠키 직접 전달
-  const headerStore = await headers();
-  console.log('쿠키:', headerStore.get('cookie'));
+
   try {
     if (!REFRESH_TOKEN) {
       console.log('🔴 refreshToken 없음');

@@ -53,7 +53,6 @@ export async function POST(req: Request) {
     //streamer 방송진행중일 때
     if (data.content) {
       const { status, liveCategory, liveCategoryValue } = await data.content;
-      console.log('[DEBUG] liveDetail:', streamerInfo);
       streamerInfo = {
         status,
         channel: channelContent,

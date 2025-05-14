@@ -1,3 +1,4 @@
+import { toast } from 'react-toastify';
 import Cancel from '../../../public/assets/icons/Cancel';
 import Heart from '../../../public/assets/icons/Heart';
 import ZzzicIcon from '../../../public/assets/icons/ZzzicIcon';
@@ -36,15 +37,12 @@ export default function MemberCard({
   };
   const onClickBanHandler = async () => {
     if (!accessToken) return;
-    console.log('delete! <3');
-    console.log('asd');
+
     queryClient.refetchQueries({ queryKey: ['participants'] });
     const response = await deleteContentsSessionParticipant(accessToken, memberId);
     if (response.success) {
       refreshUsers();
-      console.log('유저를 추방했습니다.');
-    } else {
-      console.log('유저 추방 문제 발생');
+      toast.success('유저를 추방했습니다.');
     }
   };
   return (

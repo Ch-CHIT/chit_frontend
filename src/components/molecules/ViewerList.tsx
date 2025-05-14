@@ -22,7 +22,7 @@ export default function ViewerList({ participants, maxGroupParticipants, loadMor
   const createGroupedUser = useCallback(
     (participants: ParticipantResponseType[]) => {
       if (!maxGroupParticipants) {
-        console.log('값없음');
+        console.error('maxGroupParticipants 값없음');
         return;
       }
 

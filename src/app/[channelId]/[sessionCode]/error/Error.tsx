@@ -14,7 +14,7 @@ export default function Error({
   const params = useParams();
   const channelId = params.channelId;
   useEffect(() => {
-    console.log(error);
+    console.error(error);
   }, [error, reset]);
 
   return (

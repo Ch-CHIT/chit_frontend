@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import CategoryText from '@/components/atoms/text/CategoryText';
 import Live from '@/components/atoms/label/Live';
@@ -7,25 +6,20 @@ import ViewerPageLayout from '@/components/layout/ViewerPageLayout';
 import { postStreamerInfo } from '@/services/streamer/streamer';
 import StreamerTextLive from '@/components/atoms/text/StreamerTextLive';
 import BtnViewerLogin from '@/components/atoms/button/BtnViewerLogin';
+import BigProfileImg from '@/components/atoms/profile/BigProfileImg';
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ slug: { channelId: string; sessionCode: string } }>;
-}) {
-  //로그인 되어있는지
-  console.log('params', params);
-  const { sessionCode, channelId } = (await params).slug;
-  console.log(channelId, sessionCode);
+type Params = { params: Promise<{ channelId: string; sessionCode: string }> };
+
+export default async function Page(props: Params) {
+  const { params } = props;
+  const { channelId, sessionCode } = await params;
   const streamerInfo = await postStreamerInfo(channelId);
-
-  console.log(streamerInfo);
 
   if (!streamerInfo) {
     notFound();
   }
 
-  if (streamerInfo.status === 'CLOSE') {
+  if (streamerInfo?.status === 'CLOSE') {
     return (
       <ViewerPageLayout>
         <section className="flex w-full flex-1 flex-col items-center justify-center">
@@ -51,14 +45,10 @@ export default async function Page({
           <div className="mb-10 flex flex-col items-center justify-center gap-2">
             <StreamerTextLive isLive={streamerInfo.status}></StreamerTextLive>
           </div>
-          <Image
-            src={streamerInfo.channel.channelImageUrl || '/tempImage.png'}
-            width={128}
-            height={128}
-            alt="profile"
-            className={`${streamerInfo.status === 'OPEN' ? 'shadow-inset-primary' : 'shadow-inset-disable'} overflow-hidden rounded-full p-[3px]`}
-          />
-
+          <BigProfileImg
+            imageUrl={streamerInfo.channel.channelImageUrl}
+            status={streamerInfo.status}
+          ></BigProfileImg>
           <div className="mt-3 flex flex-row items-center justify-center">
             {streamerInfo.status === 'OPEN' ? <Live /> : <OFF />}
             <div className="text-bold-large">{streamerInfo.channel.channelName}</div>

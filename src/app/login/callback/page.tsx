@@ -1,22 +1,22 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import useChannelStore from '@/store/channelStore';
 import useAuthStore from '@/store/authStore';
-import useContentsSessionStore from '@/store/sessionStore';
 import CommonLayout from '@/components/layout/CommonLayout';
 import { login } from '@/services/auth/auth';
 import { isErrorResponse } from '@/lib/handleErrors';
+import useParamsParser from '@/hooks/useParamsParser';
+import useChannelStore from '@/store/channelStore';
 
 export default function Page() {
   const router = useRouter();
+  const { channelId, sessionCode } = useParamsParser();
   const searchParams = useSearchParams();
   const code = searchParams.get('code');
   const state = searchParams.get('state');
-  const sessionCode = useContentsSessionStore((state) => state.sessionInfo?.sessionCode);
-  const isRehydrated = useAuthStore((state) => state.isRehydrated);
-  const { setChannelId, channelId } = useChannelStore((state) => state);
-  const { setLogin, setAccessToken } = useAuthStore((state) => state);
+  const { isRehydrated } = useAuthStore((state) => state);
+  const { setChannelId } = useChannelStore((state) => state);
+  const { setLogin, setAccessToken, role } = useAuthStore((state) => state);
 
   const [isRedirecting, setIsRedirecting] = useState(false);
 
@@ -39,11 +39,22 @@ export default function Page() {
         return;
       }
 
-      const { accessToken, channelId: newChannelId } = response;
+      const { accessToken, channelId: userChannelId } = response;
       setAccessToken(accessToken);
-      setChannelId(newChannelId);
 
-      const targetUrl = newChannelId && sessionCode ? `/${newChannelId}/${sessionCode}` : '/';
+      let targetId = userChannelId;
+      //스트리머일때
+      if (role === 'STREAMER') setChannelId(userChannelId);
+      else {
+        //시청자일때
+        if (channelId) {
+          setChannelId(channelId);
+          targetId = channelId;
+        }
+      }
+
+      const targetUrl =
+        targetId && sessionCode && role == 'VIEWER' ? `/${targetId}/${sessionCode}` : '/';
 
       router.replace(targetUrl); //2번 케이스 채널 id가 있을 경우
     };
@@ -59,6 +70,7 @@ export default function Page() {
     sessionCode,
     setAccessToken,
     setChannelId,
+    role,
   ]);
 
   if (!code && !state) {
@@ -69,6 +81,11 @@ export default function Page() {
       </CommonLayout>
     );
   }
+
+  if (!channelId)
+    <CommonLayout>
+      <div>링크를 다시 확인해주세요</div>
+    </CommonLayout>;
 
   return <CommonLayout>{isRedirecting ? <div>잠시만 기다려 주세요...</div> : null}</CommonLayout>;
 }

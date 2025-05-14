@@ -34,7 +34,7 @@ const useChannelStore = create<ChannelState & ChannelAction>()(
       }),
       {
         name: STORAGE_KEYS.ChannelStorageKey,
-        storage: createJSONStorage(() => localStorage),
+        storage: createJSONStorage(() => sessionStorage),
         partialize: (state) => ({
           channelId: state.channelId,
           streamerInfo: state.streamerInfo,

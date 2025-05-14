@@ -16,9 +16,9 @@ const useLogout = () => {
     resetSession();
     router.refresh();
     console.log('🔴 로그아웃');
-    localStorage.removeItem(STORAGE_KEYS.AuthStorageKey);
-    localStorage.removeItem(STORAGE_KEYS.SSEStorageKey);
-    localStorage.removeItem(STORAGE_KEYS.SessionStorageKey);
+    sessionStorage.removeItem(STORAGE_KEYS.AuthStorageKey);
+    sessionStorage.removeItem(STORAGE_KEYS.SSEStorageKey);
+    sessionStorage.removeItem(STORAGE_KEYS.SessionStorageKey);
   };
 
   return resetLocal;

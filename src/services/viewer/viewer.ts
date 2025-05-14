@@ -58,7 +58,6 @@ export const deleteContentsSessionViewerLeave = async ({
   accessToken,
   sessionCode,
 }: DeleteContentSessionViewerLeaveRequest): Promise<DeleteContentSessionViewerLeaveResponse> => {
-  console.log(accessToken);
   try {
     const response = await sessionClient.delete(
       `${SESSION_URLS.contentsSession}/${sessionCode}/leave`,
