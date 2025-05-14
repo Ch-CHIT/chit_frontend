@@ -19,7 +19,7 @@ export default async function Page(props: Params) {
     notFound();
   }
 
-  if (streamerInfo.status === 'CLOSE') {
+  if (streamerInfo?.status === 'CLOSE') {
     return (
       <ViewerPageLayout>
         <section className="flex w-full flex-1 flex-col items-center justify-center">

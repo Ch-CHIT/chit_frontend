@@ -1,21 +1,21 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import useChannelStore from '@/store/channelStore';
 import useAuthStore from '@/store/authStore';
-import useContentsSessionStore from '@/store/sessionStore';
 import CommonLayout from '@/components/layout/CommonLayout';
 import { login } from '@/services/auth/auth';
 import { isErrorResponse } from '@/lib/handleErrors';
+import useParamsParser from '@/hooks/useParamsParser';
+import useChannelStore from '@/store/channelStore';
 
 export default function Page() {
   const router = useRouter();
+  const { channelId, sessionCode } = useParamsParser();
   const searchParams = useSearchParams();
   const code = searchParams.get('code');
   const state = searchParams.get('state');
-  const sessionCode = useContentsSessionStore((state) => state.sessionInfo?.sessionCode);
   const { isRehydrated } = useAuthStore((state) => state);
-  const { setChannelId, channelId } = useChannelStore((state) => state);
+  const { setChannelId } = useChannelStore((state) => state);
   const { setLogin, setAccessToken, role } = useAuthStore((state) => state);
 
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -39,12 +39,12 @@ export default function Page() {
         return;
       }
 
-      const { accessToken, channelId: newChannelId } = response;
+      const { accessToken, channelId: userChannelId } = response;
       setAccessToken(accessToken);
 
-      let targetId = newChannelId;
+      let targetId = userChannelId;
       //스트리머일때
-      if (role === 'STREAMER') setChannelId(newChannelId);
+      if (role === 'STREAMER') setChannelId(userChannelId);
       else {
         //시청자일때
         if (channelId) {
