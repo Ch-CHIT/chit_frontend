@@ -1,9 +1,7 @@
 'use client';
 
 import BtnUserProfile from '@/components/atoms/button/BtnUserProfile';
-import useLogout from '@/hooks/useLogout';
 import useParamsParser from '@/hooks/useParamsParser';
-import useAuthStore from '@/store/authStore';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -36,7 +34,7 @@ export default function AuthInitializerClient({
 
   if (!refreshToken || !accessToken) {
     console.log('🔴 tokenInitializer  refreshToken 없음');
-    return <div>없음</div>;
+    return <div></div>;
   }
   if (!bootstrapped)
     return <Image src="/assets/loading.svg" alt="loading" width="40" height="40"></Image>;

@@ -28,7 +28,7 @@ const BtnViewerLogin = ({ channelId, sessionCode, streamerInfo }: BtnLoginProps)
       router.push(`/${channelId}/error`);
       return;
     }
-    setChannelId(streamerInfo.channel.channelId);
+    setChannelId(channelId);
     setStreamerInfo(streamerInfo);
     if (sessionCode) {
       setSessionInfo((prev) => ({
