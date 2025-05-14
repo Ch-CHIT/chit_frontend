@@ -49,7 +49,7 @@ const useAuthStore = create<AuthState & AuthAction>()(
 
       {
         name: STORAGE_KEYS.AuthStorageKey,
-        storage: createJSONStorage(() => localStorage),
+        storage: createJSONStorage(() => sessionStorage),
         partialize: (state) => ({
           role: state.role,
           isLogin: state.isLogin,

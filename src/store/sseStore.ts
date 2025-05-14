@@ -52,7 +52,7 @@ enum SSEEventType {
   SESSION_ORDER_UPDATED = 'SESSION_ORDER_UPDATED',
   CLOSED_SESSION = 'CLOSED_SESSION',
   UPDATED_SESSION = 'UPDATED_SESSION',
-  STREAMER_SESSION_UPDATED = "STREAMER_SESSION_UPDATED",
+  STREAMER_SESSION_UPDATED = 'STREAMER_SESSION_UPDATED',
 }
 
 export type ParticipantResponseType = {
@@ -333,7 +333,7 @@ export const useSSEStore = create<SSEState>()(
 
     {
       name: STORAGE_KEYS.SSEStorageKey,
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         viewerNickname: state.viewerNickname,
         viewerSessionInfo: state.viewerSessionInfo,

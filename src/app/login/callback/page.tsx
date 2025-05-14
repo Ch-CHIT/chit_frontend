@@ -1,21 +1,21 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import useChannelStore from '@/store/channelStore';
 import useAuthStore from '@/store/authStore';
-import useContentsSessionStore from '@/store/sessionStore';
 import CommonLayout from '@/components/layout/CommonLayout';
 import { login } from '@/services/auth/auth';
 import { isErrorResponse } from '@/lib/handleErrors';
+import useParamsParser from '@/hooks/useParamsParser';
+import useChannelStore from '@/store/channelStore';
 
 export default function Page() {
   const router = useRouter();
+  const { setChannelId } = useChannelStore();
+  const { channelId, sessionCode } = useParamsParser();
   const searchParams = useSearchParams();
   const code = searchParams.get('code');
   const state = searchParams.get('state');
-  const sessionCode = useContentsSessionStore((state) => state.sessionInfo?.sessionCode);
   const isRehydrated = useAuthStore((state) => state.isRehydrated);
-  const { setChannelId, channelId } = useChannelStore((state) => state);
   const { setLogin, setAccessToken } = useAuthStore((state) => state);
 
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -39,11 +39,16 @@ export default function Page() {
         return;
       }
 
-      const { accessToken, channelId: newChannelId } = response;
+      const { accessToken, channelId: userChannelId } = response;
       setAccessToken(accessToken);
-      setChannelId(newChannelId);
-
-      const targetUrl = newChannelId && sessionCode ? `/${newChannelId}/${sessionCode}` : '/';
+      //시청자일때
+      if (channelId) {
+        setChannelId(channelId);
+      } else {
+        //스트리머일때
+        setChannelId(userChannelId);
+      }
+      const targetUrl = channelId && sessionCode ? `/${channelId}/${sessionCode}` : '/';
 
       router.replace(targetUrl); //2번 케이스 채널 id가 있을 경우
     };

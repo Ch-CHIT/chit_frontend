@@ -8,24 +8,22 @@ import { postStreamerInfo } from '@/services/streamer/streamer';
 import StreamerTextLive from '@/components/atoms/text/StreamerTextLive';
 import BtnViewerLogin from '@/components/atoms/button/BtnViewerLogin';
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ slug: { channelId: string; sessionCode: string } }>;
-}) {
+type PageProps = Promise<{ params: { channelId: string; sessionCode: string } }>;
+
+export default async function Page(props: PageProps) {
   //로그인 되어있는지
-  console.log('params', params);
-  const { sessionCode, channelId } = (await params).slug;
+  const pageProps = await props;
+  const { sessionCode, channelId } = pageProps.params;
   console.log(channelId, sessionCode);
   const streamerInfo = await postStreamerInfo(channelId);
 
   console.log(streamerInfo);
 
-  if (!streamerInfo) {
+  if (!streamerInfo || streamerInfo === null) {
     notFound();
   }
 
-  if (streamerInfo.status === 'CLOSE') {
+  if (streamerInfo?.status === 'CLOSE') {
     return (
       <ViewerPageLayout>
         <section className="flex w-full flex-1 flex-col items-center justify-center">
