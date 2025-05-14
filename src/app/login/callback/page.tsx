@@ -14,9 +14,9 @@ export default function Page() {
   const code = searchParams.get('code');
   const state = searchParams.get('state');
   const sessionCode = useContentsSessionStore((state) => state.sessionInfo?.sessionCode);
-  const isRehydrated = useAuthStore((state) => state.isRehydrated);
+  const { isRehydrated } = useAuthStore((state) => state);
   const { setChannelId, channelId } = useChannelStore((state) => state);
-  const { setLogin, setAccessToken } = useAuthStore((state) => state);
+  const { setLogin, setAccessToken, role } = useAuthStore((state) => state);
 
   const [isRedirecting, setIsRedirecting] = useState(false);
 
@@ -41,9 +41,20 @@ export default function Page() {
 
       const { accessToken, channelId: newChannelId } = response;
       setAccessToken(accessToken);
-      setChannelId(newChannelId);
 
-      const targetUrl = newChannelId && sessionCode ? `/${newChannelId}/${sessionCode}` : '/';
+      let targetId = newChannelId;
+      //스트리머일때
+      if (role === 'STREAMER') setChannelId(newChannelId);
+      else {
+        //시청자일때
+        if (channelId) {
+          setChannelId(channelId);
+          targetId = channelId;
+        }
+      }
+
+      const targetUrl =
+        targetId && sessionCode && role == 'VIEWER' ? `/${targetId}/${sessionCode}` : '/';
 
       router.replace(targetUrl); //2번 케이스 채널 id가 있을 경우
     };
@@ -59,6 +70,7 @@ export default function Page() {
     sessionCode,
     setAccessToken,
     setChannelId,
+    role,
   ]);
 
   if (!code && !state) {
@@ -69,6 +81,11 @@ export default function Page() {
       </CommonLayout>
     );
   }
+
+  if (!channelId)
+    <CommonLayout>
+      <div>링크를 다시 확인해주세요</div>
+    </CommonLayout>;
 
   return <CommonLayout>{isRedirecting ? <div>잠시만 기다려 주세요...</div> : null}</CommonLayout>;
 }

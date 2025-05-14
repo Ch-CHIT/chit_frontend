@@ -11,12 +11,12 @@ import { postStreamerInfo } from '@/services/streamer/streamer';
 import { StreamerInfo } from '@/services/streamer/type';
 import useChannelStore from '@/store/channelStore';
 import useAuthStore from '@/store/authStore';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 import CommonLayout from '@/components/layout/CommonLayout';
 import { toast } from 'react-toastify';
 import HydrateProvider from '@/provider/HydrateProvider';
+import BigProfileImg from '@/components/atoms/profile/BigProfileImg';
 
 export default function Home() {
   const router = useRouter();
@@ -83,16 +83,10 @@ export default function Home() {
                 <StreamerTextLive isLive={streamerInfo.status}></StreamerTextLive>
                 <StreamerTextComment isLive={streamerInfo.status}></StreamerTextComment>
               </div>
-              <div
-                className={`relative h-32 w-32 overflow-hidden rounded-full p-[3px] ring-4 ${streamerInfo.status === 'OPEN' ? 'ring-primary' : 'ring-disable'}`}
-              >
-                <Image
-                  src={streamerInfo.channel.channelImageUrl || '/assets/logo/logo_small.svg'}
-                  fill
-                  className={`${streamerInfo.channel.channelImageUrl ? 'object-cover' : 'object-contain p-3'}`}
-                  alt="profile"
-                />
-              </div>
+              <BigProfileImg
+                imageUrl={streamerInfo.channel.channelImageUrl}
+                status={streamerInfo.status}
+              />
               <div className="mt-3 flex flex-row items-center justify-center">
                 {streamerInfo.status === 'OPEN' ? <Live /> : <OFF />}
                 <div className="text-bold-large">{streamerInfo.channel.channelName}</div>
