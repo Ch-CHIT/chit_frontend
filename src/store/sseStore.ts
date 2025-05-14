@@ -166,7 +166,7 @@ export const useSSEStore = create<SSEState>()(
             newEventSource.addEventListener(eventType, (event) => {
               console.log(`📩 ${eventType} 이벤트 수신:`, JSON.parse(event.data));
               const parsedData = JSON.parse(event.data);
-              const { status, data: eventData, message } = parsedData;
+              const { status, data: eventData } = parsedData;
 
               if (status !== 'OK') throw Error;
               const newState: Partial<SSEState> = {};
