@@ -5,17 +5,17 @@ import useAuthStore from '@/store/authStore';
 import CommonLayout from '@/components/layout/CommonLayout';
 import { login } from '@/services/auth/auth';
 import { isErrorResponse } from '@/lib/handleErrors';
-import useParamsParser from '@/hooks/useParamsParser';
 import useChannelStore from '@/store/channelStore';
 
 export default function Page() {
   const router = useRouter();
-  const { channelId, sessionCode } = useParamsParser();
   const searchParams = useSearchParams();
   const code = searchParams.get('code');
   const state = searchParams.get('state');
   const { isRehydrated } = useAuthStore((state) => state);
-  const { setChannelId } = useChannelStore((state) => state);
+  const { setChannelId, setSessionCode, channelId, sessionCode } = useChannelStore(
+    (state) => state,
+  );
   const { setLogin, setAccessToken, role } = useAuthStore((state) => state);
 
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -47,8 +47,10 @@ export default function Page() {
       if (role === 'STREAMER') setChannelId(userChannelId);
       else {
         //시청자일때
-        if (channelId) {
+        if (channelId && sessionCode) {
+          console.log(channelId, sessionCode, role);
           setChannelId(channelId);
+          setSessionCode(sessionCode);
           targetId = channelId;
         }
       }
@@ -71,6 +73,7 @@ export default function Page() {
     setAccessToken,
     setChannelId,
     role,
+    setSessionCode,
   ]);
 
   if (!code && !state) {

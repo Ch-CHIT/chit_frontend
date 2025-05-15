@@ -2,6 +2,7 @@
 
 import BtnUserProfile from '@/components/atoms/button/BtnUserProfile';
 import useParamsParser from '@/hooks/useParamsParser';
+import useAuthStore from '@/store/authStore';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -15,6 +16,7 @@ export default function AuthInitializerClient({
 }) {
   const [bootstrapped, setBootstrapped] = useState(false);
   const { channelId, sessionCode } = useParamsParser();
+  const setAccestoken = useAuthStore((state) => state.setAccessToken);
   const router = useRouter();
   //새로고침시에 불러오기
 
@@ -31,6 +33,10 @@ export default function AuthInitializerClient({
     init();
     setBootstrapped(true);
   }, [accessToken, channelId, router, sessionCode]);
+
+  useEffect(() => {
+    setAccestoken(accessToken);
+  }, [accessToken, setAccestoken]);
 
   if (!refreshToken || !accessToken) {
     console.log('🔴 tokenInitializer  refreshToken 없음');

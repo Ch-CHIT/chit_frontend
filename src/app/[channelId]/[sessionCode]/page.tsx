@@ -12,8 +12,8 @@ type Params = { params: Promise<{ channelId: string; sessionCode: string }> };
 
 export default async function Page(props: Params) {
   const { params } = props;
-  const { channelId, sessionCode } = await params;
-  const streamerInfo = await postStreamerInfo(channelId);
+  const { channelId: paramsChannelId, sessionCode: paramsSessionCode } = await params;
+  const streamerInfo = await postStreamerInfo(paramsChannelId);
 
   if (!streamerInfo) {
     notFound();
@@ -56,8 +56,8 @@ export default async function Page(props: Params) {
           <CategoryText category={streamerInfo.liveCategoryValue || ''}></CategoryText>
         </section>
         <BtnViewerLogin
-          channelId={channelId}
-          sessionCode={sessionCode}
+          channelId={paramsChannelId}
+          sessionCode={paramsSessionCode}
           streamerInfo={streamerInfo}
         ></BtnViewerLogin>
       </>

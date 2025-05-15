@@ -14,13 +14,25 @@ type BtnLoginProps = {
   streamerInfo: StreamerInfo | null;
 };
 
-const BtnViewerLogin = ({ channelId, sessionCode, streamerInfo }: BtnLoginProps) => {
+const BtnViewerLogin = ({
+  channelId: paramsChannelId,
+  sessionCode: paramsSessionCode,
+  streamerInfo,
+}: BtnLoginProps) => {
   const router = useRouter();
   const setRole = useAuthStore((state) => state.setRole);
-  const setChannelId = useChannelStore((state) => state.setChannelId);
-  const setStreamerInfo = useChannelStore((state) => state.setStreamerInfo);
+  const {
+    setStreamerInfo,
+    setSessionCode,
+    setChannelId,
+    channelId: stateChannelId,
+    sessionCode: stateSessionCode,
+  } = useChannelStore((state) => state);
   const setSessionInfo = useContentsSessionStore((state) => state.setSessionInfo);
   const accessToken = useAuthStore((state) => state.accessToken);
+
+  const channelId = stateChannelId || paramsChannelId;
+  const sessionCode = stateSessionCode || paramsSessionCode;
 
   useEffect(() => {
     if (streamerInfo === null) {
@@ -28,7 +40,7 @@ const BtnViewerLogin = ({ channelId, sessionCode, streamerInfo }: BtnLoginProps)
       router.push(`/${channelId}/error`);
       return;
     }
-    setChannelId(channelId);
+
     setStreamerInfo(streamerInfo);
     if (sessionCode) {
       setSessionInfo((prev) => ({
@@ -36,21 +48,21 @@ const BtnViewerLogin = ({ channelId, sessionCode, streamerInfo }: BtnLoginProps)
         sessionCode,
       }));
     }
-  }, [channelId, router, sessionCode, setChannelId, setSessionInfo, setStreamerInfo, streamerInfo]);
+  }, [channelId, router, sessionCode, setSessionInfo, setStreamerInfo, streamerInfo]);
 
   const onClickLogin = async () => {
+    setRole('VIEWER');
+    setSessionCode(sessionCode);
+    setChannelId(channelId);
     if (accessToken) {
       router.push(`${sessionCode}/participation`);
     } else {
       window.location.href = process.env.NEXT_PUBLIC_API_URL || '';
     }
-    setRole('VIEWER');
   };
 
   return (
-    <BtnWithChildren onClickHandler={onClickLogin}>
-      (로그인하고 3초만에) 시참등록하기
-    </BtnWithChildren>
+    <BtnWithChildren onClickHandler={onClickLogin}>로그인하고 3초만에 시참참여하기</BtnWithChildren>
   );
 };
 
