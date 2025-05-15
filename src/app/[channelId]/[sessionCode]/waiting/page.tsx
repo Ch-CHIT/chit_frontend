@@ -2,7 +2,6 @@
 import CopyIcon from '../../../../../public/assets/icons/CopyIcon';
 
 import useChannelStore from '@/store/channelStore';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import useAuthStore from '@/store/authStore';
 import { useSSEStore, ViewerStatus } from '@/store/sseStore';
@@ -19,10 +18,10 @@ import copyClipBoard from '@/lib/copyClipBoard';
 import useBeforeUnload from '@/hooks/useBeforeUnload';
 import { heartBeat } from '@/services/common/common';
 import makeUrl from '@/lib/makeUrl';
+import MediumProfileImg from '@/components/atoms/profile/MediumProfileImg';
 
 export default function Page() {
   const streamerInfo = useChannelStore((state) => state.streamerInfo);
-  const channel = streamerInfo?.channel;
   const router = useRouter();
   const parentPath = useParentPath();
   const { sessionCode } = useParamsParser();
@@ -105,14 +104,11 @@ export default function Page() {
     isViewerInfoLoading && (
       <ViewerPageLayout>
         <section className="flex flex-row justify-start">
-          <Image
-            src={channel?.channelImageUrl || '/tempImage.png'}
-            width={64}
-            height={64}
-            alt="profile"
-            className={`${streamerInfo.status === 'OPEN' ? 'shadow-inset-primary' : 'shadow-inset-disable'} overflow-hidden rounded-full p-[3px]`}
+          <MediumProfileImg
+            imageUrl={streamerInfo.channel.channelImageUrl}
+            status={streamerInfo.status}
           />
-          <div className="ml-2 flex flex-col items-start justify-center">
+          <div className="ml-3 flex flex-col items-start justify-center">
             {streamerInfo.status === 'OPEN' ? <Live /> : <OFF />}
             <div className="text-bold-large">{streamerInfo.channel.channelName}</div>
           </div>

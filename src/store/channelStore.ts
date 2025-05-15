@@ -5,6 +5,7 @@ import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 
 interface ChannelState {
   channelId: string | undefined;
+  sessionCode: string | null;
   streamerInfo: StreamerInfo | null;
   isRehydrated: boolean;
 }
@@ -12,6 +13,7 @@ interface ChannelState {
 type ChannelAction = {
   setChannelId: (channelId: string) => void;
   setStreamerInfo: (streamerInfo: StreamerInfo) => void;
+  setSessionCode: (channelId: string) => void;
 };
 
 const useChannelStore = create<ChannelState & ChannelAction>()(
@@ -21,10 +23,17 @@ const useChannelStore = create<ChannelState & ChannelAction>()(
         channelId: '',
         streamerInfo: null,
         isRehydrated: false,
+        sessionCode: null,
         setChannelId: (channelId) =>
           set((state) => ({
             ...state,
             channelId: channelId,
+          })),
+
+        setSessionCode: (sessionCode) =>
+          set((state) => ({
+            ...state,
+            sessionCode: sessionCode,
           })),
         setStreamerInfo: (streamerInfo) =>
           set((state) => ({
@@ -37,6 +46,7 @@ const useChannelStore = create<ChannelState & ChannelAction>()(
         storage: createJSONStorage(() => sessionStorage),
         partialize: (state) => ({
           channelId: state.channelId,
+          sessionCode: state.sessionCode,
           streamerInfo: state.streamerInfo,
         }),
         onRehydrateStorage: () => (state) => {
