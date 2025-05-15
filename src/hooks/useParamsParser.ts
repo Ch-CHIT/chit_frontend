@@ -13,7 +13,7 @@ const useParamsParser = () => {
     };
 
     return {
-      channelId: parseParam('channelID'),
+      channelId: parseParam('channelId'),
       sessionCode: parseParam('sessionCode'),
     };
   }, [params]);
