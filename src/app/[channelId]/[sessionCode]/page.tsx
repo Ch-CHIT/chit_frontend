@@ -14,7 +14,6 @@ export default async function Page(props: Params) {
   const { params } = props;
   const { channelId: paramsChannelId, sessionCode: paramsSessionCode } = await params;
   const streamerInfo = await postStreamerInfo(paramsChannelId);
-
   if (!streamerInfo) {
     notFound();
   }

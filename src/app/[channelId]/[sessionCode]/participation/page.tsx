@@ -16,7 +16,7 @@ import Input from '@/components/atoms/input/Input';
 
 export default function Settings() {
   const [viewerGameNickname, setGameNickname] = useState('');
-  const { sessionCode } = useParamsParser();
+  const { sessionCode, channelId } = useParamsParser();
   const router = useRouter();
   const { startSSE, isConnected, setViewerNickname, isSessionError } = useSSEStore();
   const streamerInfo = useChannelStore((state) => state.streamerInfo);
@@ -47,6 +47,10 @@ export default function Settings() {
       router.replace(`waiting`);
     }
   }, [isSessionError, isConnected, router]);
+
+  if (!streamerInfo) {
+    router.replace(`${channelId}/${sessionCode}`);
+  }
 
   return (
     streamerInfo && (
