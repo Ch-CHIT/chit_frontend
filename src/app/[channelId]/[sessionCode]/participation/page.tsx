@@ -28,6 +28,8 @@ export default function Settings() {
   const accessToken = useAuthStore((state) => state.accessToken);
 
   const onCompleteViewerNickname = () => {
+    console.log('deggsadasdas');
+    console.log(accessToken, viewerGameNickname);
     if (accessToken && viewerGameNickname) {
       setViewerNickname(viewerGameNickname);
 
