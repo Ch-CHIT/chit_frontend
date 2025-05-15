@@ -31,8 +31,8 @@ const BtnViewerLogin = ({
   const setSessionInfo = useContentsSessionStore((state) => state.setSessionInfo);
   const accessToken = useAuthStore((state) => state.accessToken);
 
-  const channelId = stateChannelId || paramsChannelId;
-  const sessionCode = stateSessionCode || paramsSessionCode;
+  const channelId = paramsChannelId ?? stateChannelId;
+  const sessionCode = paramsSessionCode ?? stateSessionCode;
 
   useEffect(() => {
     if (streamerInfo === null) {

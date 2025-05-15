@@ -24,7 +24,7 @@ export default function Page() {
   const streamerInfo = useChannelStore((state) => state.streamerInfo);
   const router = useRouter();
   const parentPath = useParentPath();
-  const { sessionCode } = useParamsParser();
+  const { sessionCode, channelId } = useParamsParser();
   const { accessToken, isRehydrated: isTokenLoading = false } = useAuthStore();
   const {
     viewerSessionInfo,
@@ -96,6 +96,10 @@ export default function Page() {
       clearInterval(intervalId);
     };
   }, [accessToken, isTokenLoading, sessionCode, startSSE, viewerNickname]);
+
+  if (!streamerInfo) {
+    router.replace(`/${channelId}/${sessionCode}`);
+  }
 
   return (
     isTokenLoading &&
