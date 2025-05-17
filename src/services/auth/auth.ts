@@ -1,7 +1,7 @@
 import { handleError } from '@/lib/handleErrors';
 import { RequestLogout } from './type';
 import { AUTH_URLS } from '@/constants/urls';
-import { ErrorResponse } from '../streamer/type';
+import { Result } from '../streamer/type';
 import sessionClient from '../_axios/sessionClient';
 type loginType = {
   code: string;
@@ -16,7 +16,7 @@ export const decodeJwtPayload = (token: string) => {
 export const login = async ({
   code: code,
   state: state,
-}: loginType): Promise<{ accessToken: string; channelId: string } | ErrorResponse> => {
+}: loginType): Promise<Result<{ accessToken: string; channelId: string }>> => {
   try {
     const response = await fetch('/api/login', {
       method: 'POST',
@@ -24,13 +24,12 @@ export const login = async ({
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include', // ✅ 쿠키 보내려면 이거 필요
     });
-    const { data } = await response.json();
-    const token = data;
+    const { data: token } = await response.json();
     const payload = decodeJwtPayload(token);
-
-    return { accessToken: data, channelId: payload.channelId }; // 성공적인 응답 데이터 반환
-  } catch (error: any) {
-    return handleError(error);
+    const returnData = { accessToken: token, channelId: payload.channelId };
+    return { success: true, data: returnData };
+  } catch (error: unknown) {
+    return { success: false, error: handleError(error) }; // 에러 핸들링 함수 사용
   }
 };
 

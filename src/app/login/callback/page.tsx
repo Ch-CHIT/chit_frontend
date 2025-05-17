@@ -1,94 +1,24 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import useAuthStore from '@/store/authStore';
 import CommonLayout from '@/components/layout/CommonLayout';
-import { login } from '@/services/auth/auth';
-import { isErrorResponse } from '@/lib/handleErrors';
-import useChannelStore from '@/store/channelStore';
+import LoginClientPage from '@/components/organisms/LoginClientPage';
+import { UserRoleType } from '@/store/authStore';
+import { cookies } from 'next/headers';
 
-export default function Page() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const code = searchParams.get('code');
-  const state = searchParams.get('state');
-  const { isRehydrated } = useAuthStore((state) => state);
-  const { setChannelId, setSessionCode, channelId, sessionCode } = useChannelStore(
-    (state) => state,
-  );
-  const { setLogin, setAccessToken, role } = useAuthStore((state) => state);
+type CallBackProps = {
+  searchParams: {
+    code: string;
+    state: string;
+  };
+};
 
-  const [isRedirecting, setIsRedirecting] = useState(false);
+export default async function CallBackPage({ searchParams }: CallBackProps) {
+  const code = searchParams.code;
+  const state = searchParams.state;
+  const cooikeStore = cookies();
+  const role = ((await cooikeStore).get('CH_ROLE')?.value ?? 'VIEWER') as UserRoleType;
 
-  useEffect(() => {
-    if (!code || !state || !isRehydrated) return;
-
-    const loginAndRedirect = async () => {
-      setIsRedirecting(true);
-
-      const response = await login({
-        code: code,
-        state: state,
-      }).then((res) => {
-        router.refresh();
-        return res;
-      });
-
-      if (isErrorResponse(response)) {
-        setIsRedirecting(false);
-        return;
-      }
-
-      const { accessToken, channelId: userChannelId } = response;
-      setAccessToken(accessToken);
-
-      let targetId = userChannelId;
-      //스트리머일때
-      if (role === 'STREAMER') setChannelId(userChannelId);
-      else {
-        //시청자일때
-        if (channelId && sessionCode) {
-          console.log(channelId, sessionCode, role);
-          setChannelId(channelId);
-          setSessionCode(sessionCode);
-          targetId = channelId;
-        }
-      }
-
-      const targetUrl =
-        targetId && sessionCode && role == 'VIEWER' ? `/${targetId}/${sessionCode}` : '/';
-
-      router.replace(targetUrl); //2번 케이스 채널 id가 있을 경우
-    };
-
-    loginAndRedirect();
-  }, [
-    code,
-    state,
-    channelId,
-    setLogin,
-    router,
-    isRehydrated,
-    sessionCode,
-    setAccessToken,
-    setChannelId,
-    role,
-    setSessionCode,
-  ]);
-
-  if (!code && !state) {
-    return (
-      <CommonLayout>
-        <div>재로그인이 필요합니다.</div>
-        <button onClick={() => (window.location.href = '/login')}>로그인 하러 가기</button>
-      </CommonLayout>
-    );
-  }
-
-  if (!channelId)
+  return (
     <CommonLayout>
-      <div>링크를 다시 확인해주세요</div>
-    </CommonLayout>;
-
-  return <CommonLayout>{isRedirecting ? <div>잠시만 기다려 주세요...</div> : null}</CommonLayout>;
+      <LoginClientPage code={code} state={state} role={role} />
+    </CommonLayout>
+  );
 }

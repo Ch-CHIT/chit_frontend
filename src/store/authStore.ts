@@ -2,11 +2,11 @@ import { STORAGE_KEYS } from '@/constants/urls';
 import { create } from 'zustand';
 import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 
-type RoleType = 'VIEWER' | 'STREAMER';
+export type UserRoleType = 'VIEWER' | 'STREAMER';
 
 interface AuthState {
   isLogin: boolean;
-  role: RoleType;
+  role: UserRoleType;
   isRehydrated: boolean; // 상태가 로드 완료되었는지 여부 추가
   accessToken: string | null;
   sessionCode: string;
@@ -15,7 +15,7 @@ interface AuthState {
 type AuthAction = {
   setAccessToken: (authData: string | null) => void;
   setLogin: (authData: boolean) => void;
-  setRole: (role: RoleType) => void;
+  setRole: (role: UserRoleType) => void;
 };
 
 //일단 persist 처리
@@ -41,7 +41,7 @@ const useAuthStore = create<AuthState & AuthAction>()(
           set(() => ({
             isLogin: value,
           })),
-        setRole: (value: RoleType) =>
+        setRole: (value: UserRoleType) =>
           set(() => ({
             role: value,
           })),
