@@ -4,9 +4,10 @@ import { NextRequest, NextResponse } from 'next/server';
 //
 export function middleware(request: NextRequest) {
   const cookie = request.cookies.get('REFRESH_TOKEN');
+  const role = request.cookies.get('CH_ROLE');
   let hasCookie = false;
-  const segments = request.nextUrl.pathname.split('/').filter(Boolean);
 
+  const segments = request.nextUrl.pathname.split('/').filter(Boolean);
   if (cookie?.value && cookie?.value.length >= 0) {
     hasCookie = true;
   }
@@ -18,11 +19,42 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (request.nextUrl.pathname.includes('login') || request.nextUrl.pathname.endsWith('callback')) {
+    return NextResponse.next();
+  }
+
   // 스트리머에서 sign-in요청시 리다이렉트를 스트리머 페이지로 보냅니다.
   if (!hasCookie) {
     console.log('Redirect발동');
-    if (request.nextUrl.pathname.startsWith('/streamer')) {
-      return NextResponse.redirect(new URL('/login', request.url));
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = '/login';
+    const responseWithCookie = NextResponse.redirect(redirectUrl);
+    if (!role) {
+      if (!request.nextUrl.pathname.includes('channelId')) {
+        responseWithCookie.cookies.set('CH_ROLE', 'STREAMER', {
+          path: '/',
+          maxAge: 60 * 60 * 24, // 1일
+          secure: false, // ⚠️ 프로덕션에서는 반드시 true
+          httpOnly: false,
+          sameSite: 'lax',
+        });
+      } else {
+        responseWithCookie.cookies.set('CH_ROLE', 'VIEWER', {
+          path: '/',
+          maxAge: 60 * 60 * 24, // 1일
+          secure: false, // ⚠️ 프로덕션에서는 반드시 true
+          httpOnly: false,
+          sameSite: 'lax',
+        });
+      }
+      return responseWithCookie;
+    }
+
+    if (
+      request.nextUrl.pathname.startsWith('/streamer') ||
+      !request.nextUrl.pathname.includes('channelId')
+    ) {
+      return NextResponse.redirect(redirectUrl);
     } else if (!request.nextUrl.pathname.startsWith('/streamer') && segments.length >= 3) {
       const channelId = segments[0];
       const sessionCode = segments[1];

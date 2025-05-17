@@ -5,7 +5,7 @@ import CustomError from '@/errors/errors';
 
 const sessionClient: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL, // API의 기본 URL
-  timeout: 10000,
+  timeout: 100000,
   withCredentials: true, // ✅ 여기에 추가
   headers: {
     'Content-Type': 'application/json', // 기본 Content-Type

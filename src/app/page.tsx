@@ -14,37 +14,29 @@ import useAuthStore from '@/store/authStore';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 import CommonLayout from '@/components/layout/CommonLayout';
-import { toast } from 'react-toastify';
 import HydrateProvider from '@/provider/HydrateProvider';
 import BigProfileImg from '@/components/atoms/profile/BigProfileImg';
+import Loading from './loading';
 
 export default function Home() {
   const router = useRouter();
-  const { setRole, setLogin } = useAuthStore((state) => state);
-  const accessToken = useAuthStore((state) => state.accessToken);
-  const isRehydrated = useAuthStore((state) => state.isRehydrated);
+  const { accessToken, isRehydrated, setLogin } = useAuthStore((state) => state);
   const [streamerInfo, setStateStreamerInfo] = useState<StreamerInfo | null>(null);
-  const { setChannelId, channelId } = useChannelStore((state) => state);
+  const { channelId } = useChannelStore((state) => state);
   const setStreamerInfo = useChannelStore((state) => state.setStreamerInfo);
   const onClickCreateSession = () => {
     router.push('/streamer/settings');
   };
 
   const fetchData = useCallback(async () => {
-    if (!channelId) {
-      toast.error('채널 아이디가 없습니다.');
-      router.replace('/login');
-      return;
-    }
     const response = await postStreamerInfo(channelId);
 
     if (response) {
+      console.log('response', response);
       setStateStreamerInfo(response);
-      setChannelId(response.channel.channelId);
       setStreamerInfo(response);
-      setLogin(true);
     }
-  }, [channelId, router, setChannelId, setLogin, setStreamerInfo]);
+  }, [channelId, setStreamerInfo]);
 
   useEffect(() => {
     const init = async () => {
@@ -54,24 +46,18 @@ export default function Home() {
 
     if (isRehydrated) {
       if (!accessToken) {
-        setRole('STREAMER');
         router.replace('/login');
       } else {
         setLogin(true);
         init();
       }
     }
-  }, [accessToken, fetchData, isRehydrated, router, setRole, setLogin]);
+  }, [accessToken, fetchData, router, setLogin, isRehydrated]);
 
   // 로드가 완료될 때까지 로딩 화면 표시
   if (!isRehydrated) {
-    return (
-      <CommonLayout>
-        <div>Loading...</div>
-      </CommonLayout>
-    );
+    return <Loading />;
   }
-
   return (
     <CommonLayout>
       <HydrateProvider>
@@ -96,7 +82,10 @@ export default function Home() {
                 <RefreshText onClickHandler={fetchData} />
               )}
             </section>
-            <BtnWithChildren onClickHandler={onClickCreateSession}>
+            <BtnWithChildren
+              onClickHandler={onClickCreateSession}
+              type={streamerInfo.status === 'OPEN' ? 'default' : 'disable'}
+            >
               시참 등록 생성할래요
             </BtnWithChildren>
           </div>

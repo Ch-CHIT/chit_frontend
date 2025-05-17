@@ -1,10 +1,8 @@
 'use client';
 
 import BtnUserProfile from '@/components/atoms/button/BtnUserProfile';
-import useParamsParser from '@/hooks/useParamsParser';
 import useAuthStore from '@/store/authStore';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function AuthInitializerClient({
@@ -15,24 +13,13 @@ export default function AuthInitializerClient({
   refreshToken: string | null;
 }) {
   const [bootstrapped, setBootstrapped] = useState(false);
-  const { channelId, sessionCode } = useParamsParser();
   const setAccestoken = useAuthStore((state) => state.setAccessToken);
-  const router = useRouter();
   //새로고침시에 불러오기
 
   useEffect(() => {
-    const init = async () => {
-      console.log('✅ Init triggered');
-      if (!accessToken) {
-        if (channelId && sessionCode) {
-          router.push(`/${channelId}/${sessionCode}`);
-        } else router.push('/');
-      }
-    };
-
-    init();
+    console.log('✅ Init triggered');
     setBootstrapped(true);
-  }, [accessToken, channelId, router, sessionCode]);
+  }, []);
 
   useEffect(() => {
     setAccestoken(accessToken);
