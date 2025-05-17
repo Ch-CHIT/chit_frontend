@@ -13,8 +13,14 @@ type CallBackProps = {
 export default async function CallBackPage({ searchParams }: CallBackProps) {
   const code = searchParams.code;
   const state = searchParams.state;
-  const cooikeStore = cookies();
-  const role = ((await cooikeStore).get('CH_ROLE')?.value ?? 'VIEWER') as UserRoleType;
+  const cookieStore = await cookies();
+  let role: UserRoleType = 'VIEWER';
+
+  try {
+    role = cookieStore.get('CH_ROLE')?.value as UserRoleType;
+  } catch (error) {
+    console.error('Error fetching role from cookies', error);
+  }
 
   return (
     <CommonLayout>
