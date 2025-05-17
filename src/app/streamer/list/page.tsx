@@ -50,7 +50,7 @@ const fetchParticipantsData = async ({
     return { success: false, error: { status: 400, code: 400, message: 'accessToken이 없습니다' } };
   }
   const response = await getContentsSessionInfo({ page, accessToken, size });
-  if (!response.success) {
+  if (response.success === false) {
     console.error(`api error 발생: ${response.error}`);
     return { success: false, error: response.error };
   }
