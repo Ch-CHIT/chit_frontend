@@ -34,7 +34,7 @@ export function middleware(request: NextRequest) {
     redirectUrl.pathname = '/login';
     const responseWithCookie = NextResponse.redirect(redirectUrl);
     if (!role) {
-      if (request.nextUrl.pathname.includes('streamer') || segments.length <= 2) {
+      if (segments.includes('streamer') || segments.length <= 1) {
         responseWithCookie.cookies.set('CH_ROLE', 'STREAMER', {
           path: '/',
           maxAge: 60 * 60 * 24, // 1일
@@ -54,12 +54,9 @@ export function middleware(request: NextRequest) {
       return responseWithCookie;
     }
 
-    if (
-      request.nextUrl.pathname.startsWith('/streamer') ||
-      !request.nextUrl.pathname.includes('channelId')
-    ) {
+    if (segments.includes('streamer') || segments.length <= 1) {
       return NextResponse.redirect(redirectUrl);
-    } else if (!request.nextUrl.pathname.startsWith('/streamer') && segments.length >= 3) {
+    } else if (!request.nextUrl.pathname.startsWith('/streamer') && segments.length >= 2) {
       const channelId = segments[0];
       const sessionCode = segments[1];
 

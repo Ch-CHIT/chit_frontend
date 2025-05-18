@@ -72,6 +72,7 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
     code,
     state,
     setRole,
+    isLogin,
   ]);
 
   if (!isRehydrated) {
