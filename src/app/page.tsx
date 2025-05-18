@@ -20,7 +20,7 @@ import Loading from './loading';
 
 export default function Home() {
   const router = useRouter();
-  const { accessToken, isRehydrated, setLogin } = useAuthStore((state) => state);
+  const { accessToken, isRehydrated } = useAuthStore((state) => state);
   const [streamerInfo, setStateStreamerInfo] = useState<StreamerInfo | null>(null);
   const { channelId } = useChannelStore((state) => state);
   const setStreamerInfo = useChannelStore((state) => state.setStreamerInfo);
@@ -49,11 +49,10 @@ export default function Home() {
       if (!accessToken) {
         router.replace('/login');
       } else {
-        setLogin(true);
         init();
       }
     }
-  }, [accessToken, fetchData, router, setLogin, isRehydrated]);
+  }, [accessToken, fetchData, router, isRehydrated]);
 
   // 로드가 완료될 때까지 로딩 화면 표시
   if (!isRehydrated) {
