@@ -12,7 +12,6 @@ export const POST = async (req: NextRequest): Promise<Response> => {
 
     return new Response('API URL is not defined.', { status: 400 });
   }
-
   const response = await fetch(process.env.NEXT_PUBLIC_API_URL + AUTH_URLS.login, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -20,7 +19,17 @@ export const POST = async (req: NextRequest): Promise<Response> => {
     credentials: 'include',
   });
 
-  return response;
+  let body = {};
+
+  try {
+    body = await response.json();
+  } catch {
+    const text = await response.text();
+    console.error('❌ login upstream returned non-JSON:', text);
+    return NextResponse.json({ error: 'Upstream returned invalid JSON' }, { status: 502 });
+  }
+
+  return NextResponse.json(body, { status: response.status });
 };
 
 //로그아웃 시 쿠키 삭제를 위한 api

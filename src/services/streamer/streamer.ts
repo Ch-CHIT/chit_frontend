@@ -56,6 +56,8 @@ export const postStreamerInfo = async (channelId: string): Promise<StreamerInfo 
   }
 
   const json = await res.json();
+  console.log('dhshdhsh');
+  console.log(json);
   return json?.streamerInfo ?? null; // 응답 데이터에서 스트리머 정보 추출
 };
 

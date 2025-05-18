@@ -1,8 +1,8 @@
 import { StreamerInfo } from '@/services/streamer/type';
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 
 // POST 요청 처리
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { channelId } = body;
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     );
 
     const channelInfo = await channelDetailResponse.json();
-    const channelContent = await channelInfo.content;
+    const channelContent = channelInfo.content;
 
     //liveDetailResponse
     // 방송중인지 확인하기 위한 API 호출
@@ -36,6 +36,7 @@ export async function POST(req: Request) {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0',
         },
       },
     );

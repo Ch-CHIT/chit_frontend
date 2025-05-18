@@ -65,5 +65,5 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 export const config = {
-  matcher: ['/streamer/:path*', '/:channelId/:sessionCode/:path*'],
+  matcher: ['/streamer/:path*', '/:channelId/:sessionCode/'],
 };
