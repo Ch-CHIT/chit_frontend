@@ -24,6 +24,7 @@ export default function Home() {
   const [streamerInfo, setStateStreamerInfo] = useState<StreamerInfo | null>(null);
   const { channelId } = useChannelStore((state) => state);
   const setStreamerInfo = useChannelStore((state) => state.setStreamerInfo);
+
   const onClickCreateSession = () => {
     router.push('/streamer/settings');
   };
