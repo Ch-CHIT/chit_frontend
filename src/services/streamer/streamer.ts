@@ -51,10 +51,13 @@ export const postStreamerInfo = async (channelId: string): Promise<StreamerInfo 
     throw error;
   });
   if (!res.ok) {
+    console.error(res);
     console.error('스트리머 정보 가져오기 실패');
     return null;
   }
+  console.log('rreess');
 
+  console.log(res);
   const json = await res.json();
   console.log('dhshdhsh');
   console.log(json);

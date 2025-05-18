@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     const channelInfo = await channelDetailResponse.json();
     const channelContent = channelInfo.content;
-
+    console.log(channelId);
     //liveDetailResponse
     // 방송중인지 확인하기 위한 API 호출
     const liveDetailResponse = await fetch(
@@ -61,7 +61,8 @@ export async function POST(req: NextRequest) {
         liveCategoryValue,
       };
     }
-
+    console.log('data');
+    console.log(data);
     return NextResponse.json({ streamerInfo }, { status: 200 });
   } catch (error: any) {
     console.error('🔥 Error fetching streamer info:', error);

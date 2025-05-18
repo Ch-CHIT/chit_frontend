@@ -18,10 +18,10 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
   const { setChannelId, setSessionCode, channelId, sessionCode } = useChannelStore(
     (state) => state,
   );
-  const { setLogin, setAccessToken, setRole } = useAuthStore((state) => state);
+  const { setLogin, setAccessToken, setRole, isLogin } = useAuthStore((state) => state);
 
   useEffect(() => {
-    if (!isRehydrated) return;
+    if (!isRehydrated || isLogin) return;
 
     const loginAndRedirect = async () => {
       const response = await login({
@@ -31,7 +31,8 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
         router.refresh();
         return res;
       });
-
+      console.log('respnse');
+      console.log(response);
       if (response.success) {
         const { accessToken, channelId: userChannelId } = response.data;
         setAccessToken(accessToken);
@@ -50,6 +51,7 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
         }
 
         setRole(role);
+        setLogin(true);
 
         const targetUrl = role == 'VIEWER' ? `/${targetId}/${sessionCode}` : '/';
         router.replace(targetUrl);
@@ -72,6 +74,9 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
     setRole,
   ]);
 
+  if (!isRehydrated) {
+    <Loading />;
+  }
   if (!code || !state || !role) {
     return (
       <CommonLayout>
@@ -81,5 +86,5 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
     );
   }
 
-  return !isRehydrated && <Loading />;
+  return <Loading />;
 }
