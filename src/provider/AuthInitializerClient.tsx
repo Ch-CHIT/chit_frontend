@@ -13,7 +13,7 @@ export default function AuthInitializerClient({
   refreshToken: string | null;
 }) {
   const [bootstrapped, setBootstrapped] = useState(false);
-  const setAccestoken = useAuthStore((state) => state.setAccessToken);
+  const { setAccessToken, setLogin } = useAuthStore((state) => state);
   //새로고침시에 불러오기
 
   useEffect(() => {
@@ -22,8 +22,9 @@ export default function AuthInitializerClient({
   }, []);
 
   useEffect(() => {
-    setAccestoken(accessToken);
-  }, [accessToken, setAccestoken]);
+    setAccessToken(accessToken);
+    setLogin(true);
+  }, [accessToken, setAccessToken, setLogin]);
 
   if (!refreshToken || !accessToken) {
     console.log('🔴 tokenInitializer  refreshToken 없음');

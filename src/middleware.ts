@@ -6,9 +6,14 @@ export function middleware(request: NextRequest) {
   const cookie = request.cookies.get('REFRESH_TOKEN');
   const role = request.cookies.get('CH_ROLE');
 
+  console.log('middleware');
+  console.log(request.nextUrl.pathname);
+
   let hasCookie = false;
 
   const segments = request.nextUrl.pathname.split('/').filter(Boolean);
+  console.log('segments');
+  console.log(segments);
   if (cookie?.value && cookie?.value.length >= 0) {
     hasCookie = true;
   }
@@ -17,7 +22,8 @@ export function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/_next/') ||
     request.nextUrl.pathname.startsWith('/favicon.ico') ||
     request.nextUrl.pathname.startsWith('/assets/') ||
-    request.nextUrl.pathname.startsWith('/api/')
+    request.nextUrl.pathname.startsWith('/api/') ||
+    request.nextUrl.pathname.startsWith('/.well-known/')
   ) {
     return NextResponse.next();
   }
@@ -34,7 +40,7 @@ export function middleware(request: NextRequest) {
     redirectUrl.pathname = '/login';
     const responseWithCookie = NextResponse.redirect(redirectUrl);
     if (!role) {
-      if (segments.includes('streamer') || segments.length <= 1) {
+      if (segments.includes('streamer') && segments.length <= 1) {
         responseWithCookie.cookies.set('CH_ROLE', 'STREAMER', {
           path: '/',
           maxAge: 60 * 60 * 24, // 1일
