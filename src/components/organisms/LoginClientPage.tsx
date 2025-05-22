@@ -31,8 +31,7 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
         router.refresh();
         return res;
       });
-      console.log('respnse');
-      console.log(response);
+
       if (response.success) {
         const { accessToken, channelId: userChannelId } = response.data;
         setAccessToken(accessToken);
