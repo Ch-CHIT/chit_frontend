@@ -18,61 +18,67 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
   const { setChannelId, setSessionCode, channelId, sessionCode } = useChannelStore(
     (state) => state,
   );
-  const { setAccessToken, setRole } = useAuthStore((state) => state);
+  const { setAccessToken, setRole, setLogin, isLogin } = useAuthStore((state) => state);
 
+  console.log(code, state, role);
   useEffect(() => {
     if (!isRehydrated) return;
-
+    if (isLogin) return;
     const loginAndRedirect = async () => {
       const response = await login({
         code: code,
         state: state,
       }).then((res) => {
-        router.refresh();
         return res;
       });
 
       if (response.success) {
         const { accessToken, channelId: userChannelId } = response.data;
         setAccessToken(accessToken);
-        let targetId = userChannelId;
+        setRole(role);
+        setLogin(true);
 
-        //스트리머일때
-        if (role === 'STREAMER') setChannelId(userChannelId);
-        else {
-          //시청자일때
+        // 채널 상태 저장 (VIEWER/STREAMER 별 분기)
+        if (role === 'STREAMER') {
+          setChannelId(userChannelId);
+        } else {
           if (channelId && sessionCode) {
             setChannelId(channelId);
             setSessionCode(sessionCode);
-
-            targetId = channelId;
           }
         }
-
-        setRole(role);
-
-        const targetUrl = role == 'VIEWER' ? `/${targetId}/${sessionCode}` : '/';
-        router.replace(targetUrl);
       }
     };
 
     loginAndRedirect();
   }, [
-    channelId,
-    router,
     isRehydrated,
     sessionCode,
-    setAccessToken,
-    setChannelId,
     role,
-    setSessionCode,
     code,
     state,
+    setAccessToken,
     setRole,
+    setLogin,
+    setChannelId,
+    setSessionCode,
+    channelId,
+    isLogin,
   ]);
 
+  // 2. 상태 변화 감지 후 리디렉트
+  useEffect(() => {
+    if (!isLogin) return;
+    // VIEWER는 채널, 세션코드 필요
+    let targetUrl = '/';
+    if (role === 'VIEWER' && channelId && sessionCode) {
+      targetUrl = `/viewer/${channelId}/${sessionCode}`;
+    }
+    router.replace(targetUrl);
+  }, [isLogin, role, channelId, sessionCode, router]);
+
   if (!isRehydrated) {
-    <Loading />;
+    return <Loading />;
   }
   if (!code || !state || !role) {
     return (

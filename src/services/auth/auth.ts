@@ -18,7 +18,7 @@ export const login = async ({
   state: state,
 }: loginType): Promise<Result<{ accessToken: string; channelId: string }>> => {
   try {
-    const response = await fetch('/api/login', {
+    const response = await fetch('/api/auth', {
       method: 'POST',
       body: JSON.stringify({ code, state }),
       headers: { 'Content-Type': 'application/json' },
@@ -47,6 +47,12 @@ export const logout = async ({ accessToken }: RequestLogout) => {
       }, // ✅ 쿠키 보내려면 이거 필요,
     );
 
+    if (response.status == 200) {
+      await fetch('/api/auth/', {
+        method: 'GET',
+        credentials: 'include', // ✅ 쿠키 보내려면 이거 필요
+      });
+    }
     return response;
   } catch (error: any) {
     return handleError(error);

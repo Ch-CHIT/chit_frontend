@@ -31,7 +31,7 @@ export default function StreamerTools({
       />
       <div className="flex flex-row rounded-md bg-background-sub p-2">
         <BtnCopyLink
-          link={`${process.env.NEXT_PUBLIC_FRONT_API_URL}/${channelId}/${sessionCode}`}
+          link={`${process.env.NEXT_PUBLIC_FRONT_API_URL}/viewer/${channelId}/${sessionCode}`}
         />
         <BtnSetting onClickHandler={onClickSettingHandler} />
       </div>

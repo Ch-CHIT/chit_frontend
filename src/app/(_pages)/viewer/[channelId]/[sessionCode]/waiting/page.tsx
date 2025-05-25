@@ -1,5 +1,4 @@
 'use client';
-import CopyIcon from '../../../../../public/assets/icons/CopyIcon';
 
 import useChannelStore from '@/store/channelStore';
 import { useEffect, useState } from 'react';
@@ -19,6 +18,7 @@ import useBeforeUnload from '@/hooks/useBeforeUnload';
 import { heartBeat } from '@/services/common/common';
 import makeUrl from '@/lib/makeUrl';
 import MediumProfileImg from '@/components/atoms/profile/MediumProfileImg';
+import CopyIcon from '../../../../../../../public/assets/icons/CopyIcon';
 
 export default function Page() {
   const streamerInfo = useChannelStore((state) => state.streamerInfo);
