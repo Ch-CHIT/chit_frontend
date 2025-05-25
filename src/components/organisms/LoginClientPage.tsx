@@ -20,6 +20,8 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
   );
   const { setAccessToken, setRole } = useAuthStore((state) => state);
 
+  console.log(code, state, role);
+
   useEffect(() => {
     if (!isRehydrated) return;
 

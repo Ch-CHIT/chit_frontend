@@ -2,7 +2,7 @@ import { STORAGE_KEYS } from '@/constants/urls';
 import { create } from 'zustand';
 import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 
-export type UserRoleType = 'VIEWER' | 'STREAMER';
+export type UserRoleType = 'VIEWER' | 'STREAMER' | 'DEFAULT';
 
 interface AuthState {
   isLogin: boolean;
