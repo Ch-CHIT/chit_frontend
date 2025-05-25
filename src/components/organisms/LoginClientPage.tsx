@@ -23,6 +23,7 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
   console.log(code, state, role);
   useEffect(() => {
     if (!isRehydrated) return;
+    if (isLogin) return;
     const loginAndRedirect = async () => {
       const response = await login({
         code: code,
@@ -64,6 +65,7 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
     setChannelId,
     setSessionCode,
     channelId,
+    isLogin,
   ]);
 
   // 2. 상태 변화 감지 후 리디렉트
