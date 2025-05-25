@@ -1,29 +1,31 @@
+'use server';
 import { cookies } from 'next/headers';
 import AuthInitializerClient from './AuthInitializerClient';
-import { createSSRClient } from '@/services/_axios/ssrClient';
-import { DEFAULT_URL } from '@/constants/urls';
+import { postRefresh } from '@/services/auth/auth';
 
 export default async function AuthInitializer() {
   const cookieStore = await cookies();
   const REFRESH_TOKEN = cookieStore.get('REFRESH_TOKEN')?.value;
-  const ssrClient = createSSRClient(`REFRESH_TOKEN=${REFRESH_TOKEN}`); // 👈 쿠키 직접 전달
 
-  try {
-    if (!REFRESH_TOKEN) {
-      console.log('🔴 refreshToken 없음');
-      return <AuthInitializerClient accessToken={null} refreshToken={null} />;
+  if (REFRESH_TOKEN) {
+    console.log('🔴 refreshToken 있음');
+
+    const response = await postRefresh({ refreshToken: REFRESH_TOKEN });
+    console.log(response);
+
+    if (response.success) {
+      console.log('🔵 refreshToken 재발급 성공');
+      console.log(response);
+      const accessToken = response.data;
+      console.log('debug : refreshToken 재발급');
+      return <AuthInitializerClient accessToken={accessToken} />;
+    } else {
+      console.log('🔴 refreshToken 재발급 실패');
+      return <AuthInitializerClient accessToken={null} />;
     }
-    const response = await ssrClient.post(
-      DEFAULT_URL + '/auth/refresh',
-      {},
-      { withCredentials: true },
-    ); // 원하는 API 호출
-    const accessToken = response.data?.data;
-    console.log('debug : refreshToken 재발급');
-    console.log(response.data);
-    return <AuthInitializerClient accessToken={accessToken} refreshToken={REFRESH_TOKEN ?? null} />;
-  } catch (err) {
-    console.error('🔴 refresh 실패:', err);
-    return <AuthInitializerClient accessToken={null} refreshToken={null} />;
+  } else {
+    console.log('🔴 refreshToken 없음');
+
+    return <AuthInitializerClient accessToken={null} />;
   }
 }

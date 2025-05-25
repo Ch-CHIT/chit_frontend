@@ -6,10 +6,10 @@ import useAuthStore from '@/store/authStore';
 import useChannelStore from '@/store/channelStore';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const BtnUserProfile = () => {
-  const { role, accessToken, isLogin } = useAuthStore((state) => state);
+  const { role, accessToken, isLogin, isRehydrated } = useAuthStore((state) => state);
   const { streamerInfo } = useChannelStore((state) => state);
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
@@ -39,7 +39,10 @@ const BtnUserProfile = () => {
     setIsOpen(true);
   };
 
-  if (!isLogin) {
+  useEffect(() => {}, [isLogin]);
+
+  if (!isRehydrated || !isLogin) {
+    console.log('🔴 BtnUserProfile: isRehydrated가 아닙니다.');
     return <div></div>;
   }
 

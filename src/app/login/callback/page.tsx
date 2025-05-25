@@ -21,6 +21,10 @@ export default async function CallBackPage(props: CallBackProps) {
   } catch (error) {
     console.error('Error fetching role from cookies', error);
   }
+  if (!code || !state) {
+    console.error('Missing code or state in search parameters');
+    return <div>Error: Missing code or state</div>;
+  }
 
   return (
     <CommonLayout>

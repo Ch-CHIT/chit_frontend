@@ -55,7 +55,8 @@ const BtnViewerLogin = ({
     setSessionCode(sessionCode);
     setChannelId(channelId);
     if (accessToken) {
-      router.push(`${sessionCode}/participation`);
+      console.log('로그인 상태입니다. 시참 참여 페이지로 이동합니다.');
+      router.push(`/viewer/${channelId}/${sessionCode}/participation`);
     } else {
       window.location.href = process.env.NEXT_PUBLIC_API_URL || '';
     }

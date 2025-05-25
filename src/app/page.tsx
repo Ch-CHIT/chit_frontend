@@ -20,7 +20,7 @@ import Loading from './loading';
 
 export default function Home() {
   const router = useRouter();
-  const { accessToken, isRehydrated } = useAuthStore((state) => state);
+  const { accessToken, isRehydrated, isLogin } = useAuthStore((state) => state);
   const [streamerInfo, setStateStreamerInfo] = useState<StreamerInfo | null>(null);
   const { channelId } = useChannelStore((state) => state);
   const setStreamerInfo = useChannelStore((state) => state.setStreamerInfo);
@@ -30,6 +30,10 @@ export default function Home() {
   };
 
   const fetchData = useCallback(async () => {
+    if (!channelId) {
+      router.replace('/login');
+      return;
+    }
     const response = await postStreamerInfo(channelId);
 
     if (response) {
@@ -37,7 +41,7 @@ export default function Home() {
       setStateStreamerInfo(response);
       setStreamerInfo(response);
     }
-  }, [channelId, setStreamerInfo]);
+  }, [channelId, router, setStreamerInfo]);
 
   useEffect(() => {
     const init = async () => {
@@ -46,13 +50,14 @@ export default function Home() {
     router.refresh();
 
     if (isRehydrated) {
-      if (!accessToken) {
+      if (!accessToken && !isLogin) {
+        console.log('로그인 정보가 없습니다. 로그인 페이지로 리다이렉트합니다.');
         router.replace('/login');
       } else {
         init();
       }
     }
-  }, [accessToken, fetchData, router, isRehydrated]);
+  }, [accessToken, fetchData, isLogin, router, isRehydrated]);
 
   // 로드가 완료될 때까지 로딩 화면 표시
   if (!isRehydrated) {

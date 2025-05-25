@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AUTH_URLS } from '@/constants/urls';
+import { cookies } from 'next/headers';
 
 //login 시
 export const POST = async (req: NextRequest): Promise<Response> => {
@@ -19,18 +20,14 @@ export const POST = async (req: NextRequest): Promise<Response> => {
     body: JSON.stringify({ code, state }),
     credentials: 'include',
   });
-  console.log('response');
-  console.log(response);
+
   return response;
 };
 
 //로그아웃 시 쿠키 삭제를 위한 api
 export const GET = async () => {
-  const response = new NextResponse(null, { status: 200 });
-  response.cookies.set('REFRESH_TOKEN', '', {
-    path: '/',
-    httpOnly: true,
-    expires: new Date(0),
-  });
-  return response;
+  const cookieStore = await cookies();
+  cookieStore.delete('CH_ROLE');
+
+  return NextResponse.json({ status: 200, message: '로그아웃 되었습니다.' });
 };

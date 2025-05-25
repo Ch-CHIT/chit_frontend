@@ -1,5 +1,5 @@
 'use client';
-import useAuthStore, { UserRoleType } from '@/store/authStore';
+import { UserRoleType } from '@/store/authStore';
 import NaverLogo from '../../../../public/assets/logo/NaverLogo';
 import BtnWithChildren from './BtnWithChildren';
 import { notFound } from 'next/navigation';
@@ -9,13 +9,11 @@ type BtnLoginProps = {
 };
 
 const BtnLogin = ({ role }: BtnLoginProps) => {
-  const { setRole } = useAuthStore((state) => state);
   if (!role) {
     notFound();
   }
 
   const onClickLogin = () => {
-    setRole(role);
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL}`;
   };
 
