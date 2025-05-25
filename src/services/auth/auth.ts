@@ -3,8 +3,6 @@ import { RequestLogout } from './type';
 import { AUTH_URLS } from '@/constants/urls';
 import { ErrorResponse, Result } from '../streamer/type';
 import sessionClient from '../_axios/sessionClient';
-import { RefreshAccessTokenResponse } from '../common/common';
-import { ApiResponse } from '@/store/sessionStore';
 type loginType = {
   code: string;
   state: string;
@@ -80,8 +78,6 @@ export const postRefresh = async ({
     const data = await response.json();
     if (response.status == 200) {
       return { success: true, data: data.data };
-    } else {
-      return { success: false, data: null };
     }
   } catch (error: unknown) {
     console.log(error);
