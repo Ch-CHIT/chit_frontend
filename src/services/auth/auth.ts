@@ -1,8 +1,10 @@
 import { handleError } from '@/lib/handleErrors';
 import { RequestLogout } from './type';
 import { AUTH_URLS } from '@/constants/urls';
-import { Result } from '../streamer/type';
+import { ErrorResponse, Result } from '../streamer/type';
 import sessionClient from '../_axios/sessionClient';
+import { RefreshAccessTokenResponse } from '../common/common';
+import { ApiResponse } from '@/store/sessionStore';
 type loginType = {
   code: string;
   state: string;
@@ -46,7 +48,7 @@ export const logout = async ({ accessToken }: RequestLogout) => {
         withCredentials: true,
       }, // ✅ 쿠키 보내려면 이거 필요,
     );
-
+    console.log(response);
     if (response.status == 200) {
       await fetch('/api/auth/', {
         method: 'GET',
@@ -56,5 +58,33 @@ export const logout = async ({ accessToken }: RequestLogout) => {
     return response;
   } catch (error: any) {
     return handleError(error);
+  }
+};
+
+export const postRefresh = async ({
+  refreshToken,
+}: {
+  refreshToken: string;
+}): Promise<Result<string | null>> => {
+  try {
+    const response = await fetch(process.env.NEXT_PUBLIC_API_URL + AUTH_URLS.refresh, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `REFRESH_TOKEN=${refreshToken}`,
+      },
+      credentials: 'include',
+    }); // 원하는 API 호출s
+    console.log('refres hFECTH');
+    console.log(response);
+    const data = await response.json();
+    if (response.status == 200) {
+      return { success: true, data: data.data };
+    } else {
+      return { success: false, data: null };
+    }
+  } catch (error: unknown) {
+    console.log(error);
+    return { success: false, error: error as ErrorResponse }; // 에러 핸들링 함수 사용
   }
 };

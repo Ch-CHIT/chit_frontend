@@ -12,13 +12,16 @@ export function middleware(request: NextRequest) {
     hasCookie = true;
   }
 
+  if (request.nextUrl.pathname.includes('login') || request.nextUrl.pathname.endsWith('callback')) {
+    return NextResponse.next();
+  }
 
   // 로그인 페이지로 보내기 전에 최초 요청을 통해 쿠키를 설정해 Role을 결정합니다.
-  //
   if (!hasCookie) {
     console.log('Redirect발동');
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = '/login';
+    console.log('redirectUrl', redirectUrl.pathname);
     const responseWithCookie = NextResponse.redirect(redirectUrl);
 
     if (!role) {
@@ -41,22 +44,35 @@ export function middleware(request: NextRequest) {
       }
       return responseWithCookie;
     }
-  }
-  if (request.nextUrl.pathname.includes('login') || request.nextUrl.pathname.endsWith('callback')) {
-    return NextResponse.next();
-  }
+  } else {
+    const responseWithCookie = NextResponse.next();
 
-  // if (segments.includes('streamer') || segments.length <= 1) {
-  //   return NextResponse.redirect(redirectUrl);
-  // } else if (!request.nextUrl.pathname.startsWith('/streamer') && segments.length >= 2) {
-  //   const channelId = segments[0];
-  //   const sessionCode = segments[1];
-
-  //   return NextResponse.redirect(new URL(`/${channelId}/${sessionCode}`, request.url));
-  // }
+    if (segments.includes('streamer')) {
+      if (role && role.value !== 'STREAMER') {
+        responseWithCookie.cookies.set('CH_ROLE', 'STREAMER', {
+          path: '/',
+          maxAge: 60 * 60 * 24, // 1일
+          secure: false, // ⚠️ 프로덕션에서는 반드시 true
+          httpOnly: false,
+          sameSite: 'lax',
+        });
+      }
+    } else if (segments.includes('viewer')) {
+      if (role && role.value !== 'VIEWER') {
+        responseWithCookie.cookies.set('CH_ROLE', 'VIEWER', {
+          path: '/',
+          maxAge: 60 * 60 * 24, // 1일
+          secure: false, // ⚠️ 프로덕션에서는 반드시 true
+          httpOnly: false,
+          sameSite: 'lax',
+        });
+      }
+    }
+    return responseWithCookie;
+  }
 
   return NextResponse.next();
 }
 export const config = {
-  matcher: ['/streamer/:path*', '/viewer/:channelId/:sessionCode/:path*', '/:path', '/api/:path*'],
+  matcher: ['/streamer/:path*', '/viewer/:channelId/:sessionCode/:path*', '/:path'],
 };

@@ -17,7 +17,6 @@ import CommonLayout from '@/components/layout/CommonLayout';
 import HydrateProvider from '@/provider/HydrateProvider';
 import BigProfileImg from '@/components/atoms/profile/BigProfileImg';
 import Loading from './loading';
-import { toast } from 'react-toastify';
 
 export default function Home() {
   const router = useRouter();
@@ -27,12 +26,7 @@ export default function Home() {
   const setStreamerInfo = useChannelStore((state) => state.setStreamerInfo);
 
   const onClickCreateSession = () => {
-    toast.warn(`😭code:43001
-
-이미 진행중인 컨텐츠 세션이 존재해서 중복 생성할 수 없습니다.
-
-로그아웃 또는 진행중인 세션이 종료될 때까지 잠시만 기다려 주세요!`);
-    //router.push('/streamer/settings');
+    router.push('/streamer/settings');
   };
 
   const fetchData = useCallback(async () => {

@@ -24,7 +24,7 @@ export const heartBeat = async (
   }
 };
 
-type RefreshAccessTokenResponse = { code: number; data: string; status: number };
+export type RefreshAccessTokenResponse = { code: number; data: string; status: number };
 export const refreshAccessToken = async (): Promise<
   Result<ApiResponse<RefreshAccessTokenResponse>>
 > => {
