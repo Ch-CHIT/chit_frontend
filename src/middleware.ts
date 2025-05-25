@@ -6,28 +6,12 @@ export function middleware(request: NextRequest) {
   const cookie = request.cookies.get('REFRESH_TOKEN');
   const role = request.cookies.get('CH_ROLE');
   let hasCookie = false;
-
   const segments = request.nextUrl.pathname.split('/').filter(Boolean);
-  console.log('segments');
-  console.log(segments);
-  console.log('cookie');
-  console.log(cookie);
+
   if (cookie?.value && cookie?.value.length >= 0) {
     hasCookie = true;
   }
 
-  if (
-    request.nextUrl.pathname.startsWith('/_next/') ||
-    request.nextUrl.pathname.startsWith('/favicon.ico') ||
-    request.nextUrl.pathname.startsWith('/assets/') ||
-    request.nextUrl.pathname.startsWith('/api/') ||
-    request.nextUrl.pathname.startsWith('/.well-known/')
-  ) {
-    return NextResponse.next();
-  }
-
-  console.log('middleware2');
-  console.log(segments);
 
   // 로그인 페이지로 보내기 전에 최초 요청을 통해 쿠키를 설정해 Role을 결정합니다.
   //
@@ -36,9 +20,6 @@ export function middleware(request: NextRequest) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = '/login';
     const responseWithCookie = NextResponse.redirect(redirectUrl);
-
-    console.log('role');
-    console.log(role);
 
     if (!role) {
       if (segments.includes('viewer')) {
@@ -77,5 +58,5 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 export const config = {
-  matcher: ['/streamer/:path*', '/viewer/:channelId/:sessionCode/:path*', '/:path'],
+  matcher: ['/streamer/:path*', '/viewer/:channelId/:sessionCode/:path*', '/:path', '/api/:path*'],
 };

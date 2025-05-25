@@ -54,7 +54,7 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
 
         setRole(role);
 
-        const targetUrl = role == 'VIEWER' ? `/${targetId}/${sessionCode}` : '/';
+        const targetUrl = role == 'VIEWER' ? `/viewer/${targetId}/${sessionCode}` : '/';
         router.replace(targetUrl);
       }
     };
