@@ -68,14 +68,14 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
 
   // 2. 상태 변화 감지 후 리디렉트
   useEffect(() => {
-    if (!isLogin) return;
+    if (!isLogin || !isRehydrated) return;
     // VIEWER는 채널, 세션코드 필요
     let targetUrl = '/';
     if (role === 'VIEWER' && channelId && sessionCode) {
       targetUrl = `/viewer/${channelId}/${sessionCode}`;
     }
     router.replace(targetUrl);
-  }, [isLogin, role, channelId, sessionCode, router]);
+  }, [isLogin, role, channelId, sessionCode, router, isRehydrated]);
 
   if (!isRehydrated) {
     return <Loading />;

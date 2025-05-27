@@ -22,7 +22,7 @@ export default function Home() {
   const router = useRouter();
   const { accessToken, isRehydrated, isLogin } = useAuthStore((state) => state);
   const [streamerInfo, setStateStreamerInfo] = useState<StreamerInfo | null>(null);
-  const { channelId } = useChannelStore((state) => state);
+  const { channelId, isRehydrated: isChannelRehydrated } = useChannelStore((state) => state);
   const setStreamerInfo = useChannelStore((state) => state.setStreamerInfo);
 
   const onClickCreateSession = () => {
@@ -31,6 +31,7 @@ export default function Home() {
 
   const fetchData = useCallback(async () => {
     if (!channelId) {
+      console.log('채널 ID가 없습니다. 로그인 페이지로 리다이렉트합니다.');
       router.replace('/login');
       return;
     }
@@ -41,7 +42,7 @@ export default function Home() {
       setStateStreamerInfo(response);
       setStreamerInfo(response);
     }
-  }, [channelId, router, setStreamerInfo]);
+  }, [channelId, router, setStreamerInfo, isRehydrated, accessToken]);
 
   useEffect(() => {
     const init = async () => {
@@ -49,7 +50,7 @@ export default function Home() {
     };
     router.refresh();
 
-    if (isRehydrated) {
+    if (isRehydrated || isChannelRehydrated) {
       if (!accessToken && !isLogin) {
         console.log('로그인 정보가 없습니다. 로그인 페이지로 리다이렉트합니다.');
         router.replace('/login');
@@ -57,7 +58,7 @@ export default function Home() {
         init();
       }
     }
-  }, [accessToken, fetchData, isLogin, router, isRehydrated]);
+  }, [accessToken, fetchData, isLogin, router, isRehydrated, isChannelRehydrated]);
 
   // 로드가 완료될 때까지 로딩 화면 표시
   if (!isRehydrated) {

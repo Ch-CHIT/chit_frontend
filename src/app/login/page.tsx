@@ -12,7 +12,7 @@ export default async function Home() {
         <p className="mb-2 text-bold-middle text-white">더 쉽고 편한 시참 관리</p>
         <ChitLogo width={160} height={78}></ChitLogo>
       </section>
-      <BtnLogin role={role ?? 'VIEWER'}></BtnLogin>
+      <BtnLogin role={role}></BtnLogin>
     </CommonLayout>
   );
 }
