@@ -10,13 +10,13 @@ import { useEffect, useState } from 'react';
 
 const BtnUserProfile = () => {
   const { role, accessToken, isLogin, isRehydrated } = useAuthStore((state) => state);
-  const { streamerInfo } = useChannelStore((state) => state);
+  const { myChannelInfo } = useChannelStore((state) => state);
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const { channelId, sessionCode } = useParamsParser();
   const resetLocal = useLogout();
   const channelImage =
-    streamerInfo?.channel?.channelImageUrl?.trim() || '/assets/logo/logo_small.svg';
+    myChannelInfo?.channel?.channelImageUrl?.trim() || '/assets/logo/logo_small.svg';
 
   const handleLogout = async () => {
     const userRole = role;
@@ -52,7 +52,7 @@ const BtnUserProfile = () => {
         <div className="relative z-20 h-8 w-8 rounded-full transition-shadow duration-200 ease-out group-hover:ring-2 group-hover:ring-primary">
           <Image
             src={channelImage}
-            className={`${streamerInfo?.channel?.channelImageUrl?.trim() ? 'object-cover' : 'object-contain p-[1px]'} rounded-full`}
+            className={`${myChannelInfo?.channel?.channelImageUrl?.trim() ? 'object-cover' : 'object-contain p-[1px]'} rounded-full`}
             fill
             alt="profile"
           />

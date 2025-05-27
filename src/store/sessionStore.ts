@@ -51,6 +51,14 @@ const defaultSessionInfo: ContentsSession = {
   participants: undefined,
 };
 
+// cotentsSessionStore는 시참 세션 정보를 관리하는 zustand 스토어입니다.
+// 시참세션의 정보를 담고있습니다.
+//   sessionCode: '', :생성된 세션 코드
+//   maxGroupParticipants: 0, : 세션의 최대 그룹 수
+//   currentParticipants: 0, :현재 참여인원
+//   gameParticipationCode: '', : 게임 참여코드
+//   participants: undefined, : 참여자 정보 (선택적, undefined로 초기화)
+
 const useContentsSessionStore = create<ContentsSessionState & ContentsSessionAction>()(
   devtools(
     persist(

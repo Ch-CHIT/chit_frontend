@@ -12,16 +12,11 @@ export function middleware(request: NextRequest) {
     hasCookie = true;
   }
 
-  if (request.nextUrl.pathname.includes('login') || request.nextUrl.pathname.endsWith('callback')) {
-    return NextResponse.next();
-  }
-
   // 로그인 페이지로 보내기 전에 최초 요청을 통해 쿠키를 설정해 Role을 결정합니다.
-  if (!hasCookie) {
-    console.log('Redirect발동');
+  if (!hasCookie || !role?.value) {
+    console.debug('쿠키 또는 역할 값이 없어 리다이렉트를 시작합니다.');
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = '/login';
-    console.log('redirectUrl', redirectUrl.pathname);
+    console.debug('redirectUrl', redirectUrl.pathname);
     const responseWithCookie = NextResponse.redirect(redirectUrl);
 
     if (!role) {
@@ -34,6 +29,7 @@ export function middleware(request: NextRequest) {
           sameSite: 'lax',
         });
       } else {
+        redirectUrl.pathname = '/login';
         responseWithCookie.cookies.set('CH_ROLE', 'STREAMER', {
           path: '/',
           maxAge: 60 * 60 * 24, // 1일
@@ -42,6 +38,8 @@ export function middleware(request: NextRequest) {
           sameSite: 'lax',
         });
       }
+
+      console.log('쿠키 설정 완료 리다이렉트 포인트 1');
       return responseWithCookie;
     }
   } else {
@@ -69,6 +67,9 @@ export function middleware(request: NextRequest) {
       }
     }
     return responseWithCookie;
+  }
+  if (request.nextUrl.pathname.includes('login') || request.nextUrl.pathname.endsWith('callback')) {
+    return NextResponse.next();
   }
 
   return NextResponse.next();

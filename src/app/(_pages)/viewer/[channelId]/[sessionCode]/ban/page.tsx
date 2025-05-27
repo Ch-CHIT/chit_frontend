@@ -22,10 +22,13 @@ export default function Page() {
     streamerInfo && (
       <ViewerPageLayout>
         <section className="flex flex-row justify-start">
-          <MediumProfileImg status={streamerInfo.status} />
-          <div className="ml-2 flex flex-col items-start justify-center">
+          <MediumProfileImg
+            imageUrl={streamerInfo.channel.channelImageUrl}
+            status={streamerInfo.status}
+          />
+          <div className="ml-3 flex flex-col items-start justify-center">
             {streamerInfo.status === 'OPEN' ? <Live /> : <OFF />}
-            <div className="text-bold-large">{streamerInfo.liveCategoryValue}</div>
+            <div className="text-bold-large">{streamerInfo.channel.channelName}</div>
           </div>
         </section>
         <section className="mt-11 flex w-full flex-1 flex-col items-start">
