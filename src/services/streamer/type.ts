@@ -3,6 +3,13 @@ import { PartialChannel } from 'chzzk';
 import { STATUS } from '../viewer/type';
 
 export type StreamerStatusType = 'OPEN' | 'CLOSE';
+
+export type UserInfo = {
+  status: StreamerStatusType;
+  channel: PartialChannel;
+  liveCategory: string | null;
+  liveCategoryValue: string | null;
+};
 export type StreamerInfo = {
   status: StreamerStatusType;
   channel: PartialChannel;

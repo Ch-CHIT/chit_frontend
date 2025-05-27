@@ -1,11 +1,12 @@
 'use client';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import useAuthStore, { UserRoleType } from '@/store/authStore';
 import CommonLayout from '@/components/layout/CommonLayout';
 import { login } from '@/services/auth/auth';
 import useChannelStore from '@/store/channelStore';
 import Loading from '@/app/loading';
+import { postStreamerInfo } from '@/services/streamer/streamer';
 type LoginClientPageProps = {
   code: string;
   state: string;
@@ -15,10 +16,17 @@ type LoginClientPageProps = {
 export default function LoginClientPage({ code, state, role }: LoginClientPageProps) {
   const router = useRouter();
   const { isRehydrated } = useAuthStore((state) => state);
-  const { setChannelId, setSessionCode, channelId, sessionCode } = useChannelStore(
-    (state) => state,
-  );
+  const { setChannelId, setSessionCode, channelId, sessionCode, setMyChannelInfo } =
+    useChannelStore((state) => state);
   const { setAccessToken, setRole, setLogin, isLogin } = useAuthStore((state) => state);
+
+  const fetchMyData = useCallback(async (viewerChannelId: string) => {
+    const response = await postStreamerInfo(viewerChannelId);
+    if (response) {
+      console.log('Viewer data fetched successfully:', response);
+    }
+    return response;
+  }, []);
 
   console.log(code, state, role);
   useEffect(() => {
@@ -37,7 +45,8 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
         setAccessToken(accessToken);
         setRole(role);
         setLogin(true);
-
+        const myData = await fetchMyData(userChannelId);
+        setMyChannelInfo(myData);
         // 채널 상태 저장 (VIEWER/STREAMER 별 분기)
         if (role === 'STREAMER') {
           setChannelId(userChannelId);
@@ -64,6 +73,8 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
     setSessionCode,
     channelId,
     isLogin,
+    fetchMyData,
+    setMyChannelInfo,
   ]);
 
   // 2. 상태 변화 감지 후 리디렉트
