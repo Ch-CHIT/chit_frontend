@@ -29,11 +29,17 @@ export default function Home() {
     router.push('/streamer/settings');
   };
 
+  // 채널 ID가 없을 경우 로그인 페이지로 리다이렉트
+
+  const redirectToLogin = useCallback(() => {
+    console.log('채널 ID가 없습니다. 로그인 페이지로 리다이렉트합니다.');
+    router.replace('/login');
+    return;
+  }, [router]);
+
   const fetchData = useCallback(async () => {
     if (!channelId) {
-      console.log('채널 ID가 없습니다. 로그인 페이지로 리다이렉트합니다.');
-      router.replace('/login');
-      return;
+      redirectToLogin();
     }
     const response = await postStreamerInfo(channelId);
 
@@ -42,7 +48,7 @@ export default function Home() {
       setStateStreamerInfo(response);
       setStreamerInfo(response);
     }
-  }, [channelId, router, setStreamerInfo, isRehydrated, accessToken]);
+  }, [channelId, redirectToLogin, setStreamerInfo]);
 
   useEffect(() => {
     const init = async () => {
@@ -52,13 +58,12 @@ export default function Home() {
 
     if (isRehydrated || isChannelRehydrated) {
       if (!accessToken && !isLogin) {
-        console.log('로그인 정보가 없습니다. 로그인 페이지로 리다이렉트합니다.');
-        router.replace('/login');
+        redirectToLogin();
       } else {
         init();
       }
     }
-  }, [accessToken, fetchData, isLogin, router, isRehydrated, isChannelRehydrated]);
+  }, [accessToken, fetchData, isLogin, router, isRehydrated, isChannelRehydrated, redirectToLogin]);
 
   // 로드가 완료될 때까지 로딩 화면 표시
   if (!isRehydrated) {

@@ -45,8 +45,14 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
         setAccessToken(accessToken);
         setRole(role);
         setLogin(true);
-        const myData = await fetchMyData(userChannelId);
-        setMyChannelInfo(myData);
+
+        try {
+          const myData = await fetchMyData(userChannelId);
+          setMyChannelInfo(myData);
+        } catch (error) {
+          console.error('데이터를 가져오는 중 오류가 발생했습니다:', error);
+        }
+
         // 채널 상태 저장 (VIEWER/STREAMER 별 분기)
         if (role === 'STREAMER') {
           setChannelId(userChannelId);

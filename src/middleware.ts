@@ -14,9 +14,9 @@ export function middleware(request: NextRequest) {
 
   // 로그인 페이지로 보내기 전에 최초 요청을 통해 쿠키를 설정해 Role을 결정합니다.
   if (!hasCookie || !role?.value) {
-    console.log('Redirect발동');
+    console.debug('쿠키 또는 역할 값이 없어 리다이렉트를 시작합니다.');
     const redirectUrl = request.nextUrl.clone();
-    console.log('redirectUrl', redirectUrl.pathname);
+    console.debug('redirectUrl', redirectUrl.pathname);
     const responseWithCookie = NextResponse.redirect(redirectUrl);
 
     if (!role) {
