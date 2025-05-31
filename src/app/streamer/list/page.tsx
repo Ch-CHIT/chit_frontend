@@ -71,6 +71,7 @@ export default function List() {
     sessionInfo,
     setSessionInfo,
     reset: resetContentsSession,
+    setIsSession,
   } = useContentsSessionStore((state) => state);
   const {
     startSSE,
@@ -190,6 +191,15 @@ export default function List() {
       );
     }
   }, [currentParticipants, queryClient]);
+
+  useEffect(() => {
+    setIsSession(true);
+
+    // 언마운트 시 false로
+    return () => {
+      setIsSession(false);
+    };
+  }, [setIsSession]);
 
   const participants = useMemo(() => {
     let filteredParticipants = data?.pages.flatMap((p) => p.participants || []) ?? [];

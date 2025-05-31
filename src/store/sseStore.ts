@@ -145,8 +145,8 @@ export const useSSEStore = create<SSEState>()(
         set({ isProcessing: true });
         set((state) => {
           if (state.isConnected) {
-            console.log('⚠️ 이미 SSE가 연결되어 있음. 중복 구독 방지');
-            return state;
+            console.log('⚠️ 이미 SSE가 연결되어 있음. 중복 구독 방지 요청 종료');
+            state.stopSSE();
           }
 
           console.log('새로운 SSE연결 시작');
