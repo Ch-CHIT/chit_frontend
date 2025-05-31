@@ -21,8 +21,8 @@ export default function Settings() {
   const router = useRouter();
   const { eventSource } = useSSEStore((state) => state);
   const accessToken = useAuthStore((state) => state.accessToken);
-  const { streamerInfo, sessionCode } = useChannelStore((state) => state);
-  const { setSessionInfo } = useContentsSessionStore((state) => state);
+  const { streamerInfo } = useChannelStore((state) => state);
+  const { setSessionInfo, setIsSession, isSession } = useContentsSessionStore((state) => state);
 
   //브라우저 종료시 실행되는 콜백 함수
   const handleExit = async () => {
@@ -75,10 +75,11 @@ export default function Settings() {
       toast.warn('토큰이 없습니다. 잠시후 다시 시도해주세요');
       return;
     }
-    if (!sessionCode && accessToken) {
+    if (!isSession) {
       const response = await createContentsSession(reqData, accessToken);
       if (response.success) {
         setSessionInfo(response.data.data);
+        setIsSession(true); // 세션이 생성되었음을 상태에 반영
         toast.success('✅ 세션이 성공적으로 생성되었습니다!');
         router.push(`/streamer/list?max=${maxGroupParticipants}`);
       }

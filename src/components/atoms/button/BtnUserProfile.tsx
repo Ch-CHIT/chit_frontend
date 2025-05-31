@@ -29,7 +29,7 @@ const BtnUserProfile = () => {
         if (userRole === 'STREAMER') {
           router.push(`/`);
         } else {
-          router.push(`/${channelId}/${sessionCode}`);
+          router.push(`/viewer/${channelId}/${sessionCode}`);
         }
       });
     }

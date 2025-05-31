@@ -5,7 +5,7 @@ import { useSSEStore } from '@/store/sseStore';
 import { useRouter } from 'next/navigation';
 
 const useLogout = () => {
-  const { setLogin, setAccessToken } = useAuthStore((state) => state);
+  const { setLogin, setAccessToken, role } = useAuthStore((state) => state);
   const { reset: resetSSE } = useSSEStore();
   const { reset: resetSession } = useContentsSessionStore();
   const router = useRouter();
@@ -13,12 +13,15 @@ const useLogout = () => {
     setAccessToken(null);
     setLogin(false);
     resetSSE();
-    resetSession();
+
     router.refresh();
     console.log('🔴 로그아웃');
     sessionStorage.removeItem(STORAGE_KEYS.AuthStorageKey);
     sessionStorage.removeItem(STORAGE_KEYS.SSEStorageKey);
-    sessionStorage.removeItem(STORAGE_KEYS.SessionStorageKey);
+    if (role == 'STREAMER') {
+      resetSession();
+      sessionStorage.removeItem(STORAGE_KEYS.SessionStorageKey);
+    }
   };
 
   return resetLocal;
