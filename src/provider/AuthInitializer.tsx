@@ -6,8 +6,8 @@ import { postRefresh } from '@/services/auth/auth';
 export default async function AuthInitializer() {
   const cookieStore = await cookies();
   const REFRESH_TOKEN = cookieStore.get('REFRESH_TOKEN')?.value;
-
-  if (REFRESH_TOKEN) {
+  let accessToken = null;
+  if (REFRESH_TOKEN && !accessToken) {
     console.log('🔴 refreshToken 있음');
 
     const response = await postRefresh({ refreshToken: REFRESH_TOKEN });
@@ -16,7 +16,7 @@ export default async function AuthInitializer() {
     if (response.success) {
       console.log('🔵 refreshToken 재발급 성공');
       console.log(response);
-      const accessToken = response.data;
+      accessToken = response.data;
       console.log('debug : refreshToken 재발급');
       return <AuthInitializerClient accessToken={accessToken} />;
     } else {

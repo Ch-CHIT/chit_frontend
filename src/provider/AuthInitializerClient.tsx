@@ -17,7 +17,8 @@ export default function AuthInitializerClient({ accessToken }: { accessToken: st
     if (accessToken) {
       setAccessToken(accessToken);
     }
-  }, [setAccessToken, accessToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!isRehydrated) return;
   return <BtnUserProfile />;

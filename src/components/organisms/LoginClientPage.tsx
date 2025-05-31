@@ -18,7 +18,13 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
   const { isRehydrated } = useAuthStore((state) => state);
   const { setChannelId, setSessionCode, channelId, sessionCode, setMyChannelInfo } =
     useChannelStore((state) => state);
-  const { setAccessToken, setRole, setLogin, isLogin } = useAuthStore((state) => state);
+  const {
+    setAccessToken,
+    setRole,
+    setLogin,
+    isLogin,
+    accessToken: navAccessToken,
+  } = useAuthStore((state) => state);
 
   const fetchMyData = useCallback(async (viewerChannelId: string) => {
     const response = await postStreamerInfo(viewerChannelId);
@@ -27,6 +33,17 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
     }
     return response;
   }, []);
+
+  const handleAccessToken = useCallback(
+    (accessToken: string | null | undefined) => {
+      // 보통은 accessToken이 존재할 때만 set
+      if (!navAccessToken && accessToken) {
+        console.log('🔵 accessToken 설정');
+        setAccessToken(accessToken);
+      }
+    },
+    [navAccessToken, setAccessToken],
+  );
 
   console.log(code, state, role);
   useEffect(() => {
@@ -42,7 +59,8 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
 
       if (response.success) {
         const { accessToken, channelId: userChannelId } = response.data;
-        setAccessToken(accessToken);
+
+        handleAccessToken(accessToken);
         setRole(role);
         setLogin(true);
 
@@ -72,7 +90,6 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
     role,
     code,
     state,
-    setAccessToken,
     setRole,
     setLogin,
     setChannelId,
@@ -81,6 +98,7 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
     isLogin,
     fetchMyData,
     setMyChannelInfo,
+    handleAccessToken,
   ]);
 
   // 2. 상태 변화 감지 후 리디렉트
@@ -89,7 +107,7 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
     // VIEWER는 채널, 세션코드 필요
     let targetUrl = '/';
     if (role === 'VIEWER' && channelId && sessionCode) {
-      targetUrl = `/viewer/${channelId}/${sessionCode}`;
+      targetUrl = `/viewer/${channelId}/${sessionCode}/participation`;
     }
     router.replace(targetUrl);
   }, [isLogin, role, channelId, sessionCode, router, isRehydrated]);
