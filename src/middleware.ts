@@ -17,17 +17,7 @@ export function middleware(request: NextRequest) {
     console.debug('쿠키 또는 역할 값이 없어 리다이렉트를 시작합니다.');
     const redirectUrl = request.nextUrl.clone();
     console.debug('redirectUrl', redirectUrl.pathname);
-
-    if (!role) {
-      if (segments.includes('viewer')) {
-        redirectUrl.pathname = redirectUrl.pathname; // 그대로 유지
-      } else {
-        redirectUrl.pathname = '/login'; // 스트리머면 로그인 페이지로 변경
-      }
-    }
-
-    console.debug('redirectUrl', redirectUrl.pathname);
-    const responseWithCookie = NextResponse.redirect(redirectUrl);
+    let responseWithCookie = NextResponse.redirect(redirectUrl);
 
     if (!role) {
       if (segments.includes('viewer')) {
@@ -39,6 +29,9 @@ export function middleware(request: NextRequest) {
           sameSite: 'lax',
         });
       } else {
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.pathname = '/login';
+        responseWithCookie = NextResponse.redirect(redirectUrl);
         responseWithCookie.cookies.set('CH_ROLE', 'STREAMER', {
           path: '/',
           maxAge: 60 * 60 * 24, // 1일
@@ -46,9 +39,8 @@ export function middleware(request: NextRequest) {
           httpOnly: false,
           sameSite: 'lax',
         });
+        console.debug('리다이렉트 URL 설정:', redirectUrl.pathname);
       }
-
-      console.log('쿠키 설정 완료 리다이렉트 포인트 1');
       return responseWithCookie;
     }
   } else {

@@ -13,8 +13,7 @@ type Params = { params: Promise<{ channelId: string; sessionCode: string }> };
 export default async function Page(props: Params) {
   const { params } = props;
   const { channelId: paramsChannelId, sessionCode: paramsSessionCode } = await params;
-  console.log('paramsChannelId', paramsChannelId);
-  console.log('paramsSessionCode', paramsSessionCode);
+
   const streamerInfo = await postStreamerInfo(paramsChannelId);
   if (!streamerInfo) {
     notFound();

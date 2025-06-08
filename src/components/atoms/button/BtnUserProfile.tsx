@@ -21,8 +21,9 @@ const BtnUserProfile = () => {
   const handleLogout = async () => {
     const userRole = role;
     setIsOpen(false);
-
+    console.log('🔴 BtnUserProfile: 로그아웃 요청', accessToken);
     if (accessToken) {
+      console.log('🔴 BtnUserProfile: 로그아웃 요청', accessToken);
       await logout({ accessToken }).then(() => {
         resetLocal();
         router.refresh();
@@ -32,6 +33,14 @@ const BtnUserProfile = () => {
           router.push(`/viewer/${channelId}/${sessionCode}`);
         }
       });
+    } else {
+      resetLocal();
+      router.refresh();
+      if (userRole === 'STREAMER') {
+        router.push(`/`);
+      } else {
+        router.push(`/viewer/${channelId}/${sessionCode}`);
+      }
     }
   };
 
@@ -58,9 +67,9 @@ const BtnUserProfile = () => {
           />
         </div>
         <div className="pointer-events-none absolute right-0 top-[52px] z-20 w-24 flex-col overflow-hidden rounded-2xl border-2 border-primary bg-black text-medium-13 text-white opacity-0 transition-transform duration-200 ease-out will-change-transform group-hover:pointer-events-auto group-hover:scale-[1.02] group-hover:opacity-100">
-          <div className="cursor-pointer border-b border-primary px-4 py-2 text-center hover:bg-primary/30">
+          {/* <div className="cursor-pointer border-b border-primary px-4 py-2 text-center hover:bg-primary/30">
             마이페이지
-          </div>
+          </div> */}
           <div
             onClick={onClickLogoutModal}
             className="cursor-pointer px-4 py-2 text-center hover:bg-primary/30"
