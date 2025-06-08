@@ -217,7 +217,7 @@ export default function List() {
     }
 
     return filteredParticipants;
-  }, [data?.pages, menu]);
+  }, [data?.pages, menu, currentParticipants]);
 
   const loadMoreData = async () => {
     if (!hasNextPage || isFetchingNextPage) return;
@@ -356,6 +356,7 @@ export default function List() {
     isSessionOn,
   ]);
 
+  console.log(currentParticipants);
   if (!isTokenLoading) return <div>로딩중입니다.</div>;
   const maxGroupParticipants = sessionInfo?.maxGroupParticipants ?? 1;
   return (
@@ -377,7 +378,7 @@ export default function List() {
               <p className="mb-5 mt-4 text-bold-middle">아직 참여자가 없어요</p>
             ) : (
               <p className="mb-5 mt-4 text-bold-middle">
-                총 <span className="text-primary">{participants.length}명</span>이 참여중이에요
+                총 <span className="text-primary">{currentParticipants.length}명</span>이 참여중이에요
               </p>
             )}
           </section>
