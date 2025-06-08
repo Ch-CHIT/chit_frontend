@@ -24,6 +24,7 @@ import { useRouter } from 'next/navigation';
 import { Result } from '@/services/streamer/type';
 import { logout } from '@/services/auth/auth';
 import { SessionStatus } from '@/constants/status';
+import { mergeParticipants } from '@/lib/mergeParticipants';
 
 interface getFetchParticipantsDataResponse {
   participants: ParticipantResponseType[];
@@ -69,9 +70,11 @@ export default function List() {
   const accessToken = useAuthStore((state) => state.accessToken);
   const {
     sessionInfo,
+    nextPath,
     setSessionInfo,
     reset: resetContentsSession,
     setIsSession,
+    setNextPath,
   } = useContentsSessionStore((state) => state);
   const {
     startSSE,
@@ -117,7 +120,7 @@ export default function List() {
 
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined, // 다음 페이지 정보
-    staleTime: 3000,
+    staleTime: 0,
   });
 
   //브라우저 종료시 실행되는 콜백 함수
@@ -158,20 +161,23 @@ export default function List() {
         ['participants'],
         (oldData: InfiniteParticipantsData | undefined) => {
           if (!oldData) return;
+          const oldParticipants = oldData.pages.flatMap((page) => page.participants || []);
 
-          //이벤트로 발생한 데이터와 페이지네이션으로 데이터 발생시 통합 관리
-          let newParticipants: ParticipantResponseType[] = [];
-          if (Array.isArray(currentParticipants) && currentParticipants.length > 0) {
-            // 기존 + 새 participants 통합 후 필터링
+          const newParticipants = mergeParticipants(oldParticipants, currentParticipants);
 
-            const currentIds = new Set(currentParticipants.map((p) => p.viewerId));
-            const oldParticipants = oldData.pages.flatMap((page: any) => page.participants || []);
-            // 기존 참가자 중 current에 아직 남아 있는 유저만 유지 (나간 유저 제거 및 중복삭제)
-            newParticipants = oldParticipants.filter((p) => currentIds.has(p.viewerId) === false); // current에 없는 유저만 유지해서 중복 제거
+          // //이벤트로 발생한 데이터와 페이지네이션으로 데이터 발생시 통합 관리
+          // let newParticipants: ParticipantResponseType[] = [];
+          // if (Array.isArray(currentParticipants) && currentParticipants.length > 0) {
+          //   // 기존 + 새 participants 통합 후 필터링
 
-            // current에는 최신 유저 상태가 들어있으므로 우선순위로 맨 앞에 붙인다
-            newParticipants = [...currentParticipants];
-          }
+          //   const currentIds = new Set(currentParticipants.map((p) => p.viewerId));
+          //   const oldParticipants = oldData.pages.flatMap((page: any) => page.participants || []);
+          //   // 기존 참가자 중 current에 아직 남아 있는 유저만 유지 (나간 유저 제거 및 중복삭제)
+          //   newParticipants = oldParticipants.filter((p) => currentIds.has(p.viewerId) === false); // current에 없는 유저만 유지해서 중복 제거
+
+          //   // current에는 최신 유저 상태가 들어있으므로 우선순위로 맨 앞에 붙인다
+          //   newParticipants = [...currentParticipants];
+          // }
 
           newParticipants.sort((a, b) => {
             if (a.fixedPick === b.fixedPick) {
@@ -195,11 +201,17 @@ export default function List() {
   useEffect(() => {
     setIsSession(true);
 
-    // 언마운트 시 false로
     return () => {
+      // 언마운트 시 false로
+      if (nextPath === '/settings') {
+        console.log('✅ /settings 이동 → cleanup 생략');
+        setNextPath(null); // 다음 경로 초기화
+        return;
+      }
+
       setIsSession(false);
     };
-  }, [setIsSession]);
+  }, [nextPath, setIsSession, setNextPath]);
 
   const participants = useMemo(() => {
     let filteredParticipants = data?.pages.flatMap((p) => p.participants || []) ?? [];
@@ -365,6 +377,7 @@ export default function List() {
         <div className="flex h-full w-full flex-1 flex-col items-center justify-center">
           <section id="controlBox" className="w-full">
             <StreamerTools
+              setNextPath={setNextPath}
               onClickSessionHandler={onClickSessionOnOff}
               isSessionOn={!!isSessionOn}
               sessionCode={sessionInfo?.sessionCode}
