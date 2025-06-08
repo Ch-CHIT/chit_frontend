@@ -123,8 +123,8 @@ export default function Page() {
               <div className="text-bold-small">
                 <span className="text-secondary">참여 코드</span>를 입력해서 게임에 참여해주세요
               </div>
-              <div className="mt-1 flex flex-row items-center justify-center text-bold-large">
-                {gameCode}
+              <div className="mt-1 flex w-full flex-row items-center justify-center text-bold-large">
+                <span className="overflow-hidden truncate whitespace-nowrap">{gameCode}</span>
                 <CopyIcon
                   width={16}
                   height={16}
