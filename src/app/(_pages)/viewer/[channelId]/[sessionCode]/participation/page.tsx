@@ -11,14 +11,13 @@ import BtnWithChildren from '@/components/atoms/button/BtnWithChildren';
 import CategoryText from '@/components/atoms/text/CategoryText';
 import HintText from '@/components/atoms/text/HintText';
 import ViewerPageLayout from '@/components/layout/ViewerPageLayout';
-import makeUrl from '@/lib/makeUrl';
 import Input from '@/components/atoms/input/Input';
 
 export default function Settings() {
   const [viewerGameNickname, setGameNickname] = useState('');
   const { sessionCode, channelId } = useParamsParser();
   const router = useRouter();
-  const { startSSE, isConnected, setViewerNickname, isSessionError } = useSSEStore();
+  const { isConnected, setViewerNickname, isSessionError } = useSSEStore();
   const streamerInfo = useChannelStore((state) => state.streamerInfo);
 
   const onChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,17 +27,9 @@ export default function Settings() {
   const accessToken = useAuthStore((state) => state.accessToken);
 
   const onCompleteViewerNickname = () => {
-    // if (accessToken && viewerGameNickname) {
-    //   setViewerNickname(viewerGameNickname);
-
-    //   startSSE(
-    //     makeUrl({
-    //       accessToken,
-    //       sessionCode,
-    //       viewerNickname: viewerGameNickname,
-    //     }),
-    //   );
-    // }
+    if (accessToken && viewerGameNickname) {
+      setViewerNickname(viewerGameNickname);
+    }
     router.replace(`waiting`);
   };
 

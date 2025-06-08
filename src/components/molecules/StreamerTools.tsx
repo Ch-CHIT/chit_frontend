@@ -11,15 +11,18 @@ export default function StreamerTools({
   channelId,
   isSessionOn,
   onClickSessionHandler,
+  setNextPath,
 }: {
   sessionCode: string;
   channelId: string;
   isSessionOn: boolean;
   onClickSessionHandler: () => void;
+  setNextPath: (path: string | null) => void;
 }) {
   const router = useRouter();
   const parentPath = useParentPath();
   const onClickSettingHandler = () => {
+    setNextPath('/settings');
     router.push(parentPath + '/settings');
   };
 

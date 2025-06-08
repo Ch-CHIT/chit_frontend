@@ -36,12 +36,14 @@ type ContentsSessionState = {
   sessionInfo: ContentsSession | null;
   isSession: boolean; // 세션이 존재하는지 여부
   isRehydrated: boolean; // 상태가 로드 완료되었는지 여부 추가
+  nextPath: string | null; //세션의 다음경로 저장
 };
 
 type ContentsSessionAction = {
   setSessionInfo: (update: ContentsSession | ((prev: ContentsSession) => ContentsSession)) => void;
   setIsSession: (isSession: boolean) => void;
   reset: () => void;
+  setNextPath: (path: string | null) => void;
 };
 
 //일단 persist 처리
@@ -66,10 +68,12 @@ const useContentsSessionStore = create<ContentsSessionState & ContentsSessionAct
   devtools(
     persist(
       (set) => ({
+        nextPath: null,
         sessionInfo: defaultSessionInfo,
         isRehydrated: false,
         isSession: false, // 초기값은 false로 설정
         reset: () => set({ ...defaultSessionInfo, isRehydrated: false }),
+        setNextPath: (path) => set({ nextPath: path }),
         setIsSession: (isSession) => set({ isSession }),
         setSessionInfo: (update) =>
           set((state) => ({
@@ -81,12 +85,13 @@ const useContentsSessionStore = create<ContentsSessionState & ContentsSessionAct
             },
           })),
       }),
-
       {
         name: STORAGE_KEYS.SessionStorageKey,
         storage: createJSONStorage(() => sessionStorage),
         partialize: (state) => ({
           sessionInfo: state.sessionInfo,
+          isSession: state.isSession,
+          nextPath: state.nextPath,
         }),
         onRehydrateStorage: () => (state) => {
           if (state) {
