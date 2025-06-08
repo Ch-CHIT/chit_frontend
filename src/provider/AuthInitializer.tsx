@@ -11,11 +11,9 @@ export default async function AuthInitializer() {
     console.log('🔴 refreshToken 있음');
 
     const response = await postRefresh({ refreshToken: REFRESH_TOKEN });
-    console.log(response);
 
     if (response.success) {
       console.log('🔵 refreshToken 재발급 성공');
-      console.log(response);
       accessToken = response.data;
       console.log('debug : refreshToken 재발급');
       return <AuthInitializerClient accessToken={accessToken} />;

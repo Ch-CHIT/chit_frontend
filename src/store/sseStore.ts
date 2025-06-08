@@ -152,7 +152,6 @@ export const useSSEStore = create<SSEState>()(
           console.log('새로운 SSE연결 시작');
           const newEventSource = new EventSource(url);
           newEventSource.onopen = (event) => {
-            console.log('SSE연결 성공~');
             console.log('연결성공메세지 수신', event);
             set({
               isConnected: true,
@@ -173,7 +172,7 @@ export const useSSEStore = create<SSEState>()(
 
               switch (eventType) {
                 // ✅ 공통 세션 참가 이벤트
-                case SSEEventType.JOINED_SESSION:
+                case SSEEventType.JOINED_SESSION: //시청자에게 발생생
                   console.log('📩 세션참가이벤트:', eventData);
                   if (eventData) newState.sessionCode = eventData;
                   break;
@@ -195,8 +194,6 @@ export const useSSEStore = create<SSEState>()(
                   const { maxGroupParticipants, currentParticipants, participant } =
                     eventData as EVENT_ParticipantAddedResponse;
 
-                  console.log('hit PARTICIPANT_JOINED_SESSION');
-                  console.log(participant);
                   newState.contentsSessionInfo = {
                     ...(get().contentsSessionInfo || {}),
                     maxGroupParticipants,
@@ -235,7 +232,6 @@ export const useSSEStore = create<SSEState>()(
                       ...participant,
                       order: participant.order - 1,
                     };
-                    console.log('updated order:', updated.order);
                     return updated;
                   });
                   console.log(newParticipants);
@@ -251,8 +247,6 @@ export const useSSEStore = create<SSEState>()(
                   );
 
                   newState.currentParticipants = [fixedParticipant, ...nonFixedPariticipants];
-                  console.log('newState');
-                  console.log(newState);
                   break;
                 }
 

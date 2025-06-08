@@ -29,9 +29,7 @@ const useDetectExit = (onExit: () => void) => {
         isRefresh.current = false;
       }, 3000);
     };
-    console.log(isRefresh.current);
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      console.log(isRefresh.current);
       if (!isRefresh.current) {
         event.preventDefault();
         event.returnValue = '';
