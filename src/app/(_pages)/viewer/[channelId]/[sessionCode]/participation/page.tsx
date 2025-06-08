@@ -28,17 +28,18 @@ export default function Settings() {
   const accessToken = useAuthStore((state) => state.accessToken);
 
   const onCompleteViewerNickname = () => {
-    if (accessToken && viewerGameNickname) {
-      setViewerNickname(viewerGameNickname);
+    // if (accessToken && viewerGameNickname) {
+    //   setViewerNickname(viewerGameNickname);
 
-      startSSE(
-        makeUrl({
-          accessToken,
-          sessionCode,
-          viewerNickname: viewerGameNickname,
-        }),
-      );
-    }
+    //   startSSE(
+    //     makeUrl({
+    //       accessToken,
+    //       sessionCode,
+    //       viewerNickname: viewerGameNickname,
+    //     }),
+    //   );
+    // }
+    router.replace(`waiting`);
   };
 
   useEffect(() => {

@@ -378,7 +378,7 @@ export default function List() {
               <p className="mb-5 mt-4 text-bold-middle">아직 참여자가 없어요</p>
             ) : (
               <p className="mb-5 mt-4 text-bold-middle">
-                총 <span className="text-primary">{currentParticipants.length}명</span>이 참여중이에요
+                총 <span className="text-primary">{participants.length}명</span>이 참여중이에요
               </p>
             )}
           </section>
