@@ -142,178 +142,187 @@ export const useSSEStore = create<SSEState>()(
         });
       },
       startSSE: (url) => {
+        if (get().isConnected) {
+          console.log('⚠️ SSE가 연결되어 있음. 중복 구독 방지 요청 종료');
+          get().stopSSE(); // 기존 SSE 연결 종료
+        }
+        console.log('🆕 새로운 SSE연결 시작');
         set({ isProcessing: true });
-        set((state) => {
-          if (state.isConnected) {
-            console.log('⚠️ 이미 SSE가 연결되어 있음. 중복 구독 방지 요청 종료');
-            state.stopSSE();
-          }
 
-          console.log('새로운 SSE연결 시작');
-          const newEventSource = new EventSource(url);
-          newEventSource.onopen = (event) => {
-            console.log('연결성공메세지 수신', event);
-            set({
-              isConnected: true,
-              isSessionError: false,
-              viewerStatus: ViewerStatus.JOINED,
-            }); // ✅ 에러 초기화
-          };
+        console.log('새로운 SSE연결 시작');
+        const newEventSource = new EventSource(url);
 
-          // ✅ 모든 이벤트 리스너 등록
-          Object.values(SSEEventType).forEach((eventType) => {
-            newEventSource.addEventListener(eventType, (event) => {
-              console.log(`📩 ${eventType} 이벤트 수신:`, JSON.parse(event.data));
-              const parsedData = JSON.parse(event.data);
-              const { status, data: eventData } = parsedData;
+        newEventSource.onopen = (event) => {
+          console.log('연결성공메세지 수신', event);
+          set({
+            isConnected: true,
+            isSessionError: false,
+            viewerStatus: ViewerStatus.JOINED,
+          }); // ✅ 에러 초기화
+        };
 
-              if (status !== 'OK') throw Error;
-              const newState: Partial<SSEState> = {};
+        // ✅ 모든 이벤트 리스너 등록
+        Object.values(SSEEventType).forEach((eventType) => {
+          newEventSource.addEventListener(eventType, (event) => {
+            console.log(`📩 ${eventType} 이벤트 수신:`, JSON.parse(event.data));
+            const parsedData = JSON.parse(event.data);
+            const { status, data: eventData } = parsedData;
 
-              switch (eventType) {
-                // ✅ 공통 세션 참가 이벤트
-                case SSEEventType.JOINED_SESSION: //시청자에게 발생생
-                  console.log('📩 세션참가이벤트:', eventData);
-                  if (eventData) newState.sessionCode = eventData;
-                  break;
+            if (status !== 'OK') return;
+            const newState: Partial<SSEState> = {};
 
-                //스트리머 세션 떠났을 때
-                case SSEEventType.LEFT_SESSION:
-                  get().stopSSE(); // 기존 stopSSE 함수 호출하여 안전하게 종료
-                  break;
+            switch (eventType) {
+              // ✅ 공통 세션 참가 이벤트
+              case SSEEventType.JOINED_SESSION: //시청자에게 발생생
+                console.log('📩 세션참가이벤트:', eventData);
+                if (eventData) newState.sessionCode = eventData;
+                break;
 
-                case SSEEventType.CLOSED_SESSION:
-                  get().stopSSE();
-                  set({
-                    viewerSessionInfo: null,
-                    viewerStatus: ViewerStatus.SESSION_CLOSED,
-                  }); // viewer 세션 정보 초기화
-                  break;
+              //스트리머 세션 떠났을 때
+              case SSEEventType.LEFT_SESSION:
+                get().stopSSE(); // 기존 stopSSE 함수 호출하여 안전하게 종료
+                break;
 
-                case SSEEventType.PARTICIPANT_JOINED_SESSION:
-                  const { maxGroupParticipants, currentParticipants, participant } =
-                    eventData as EVENT_ParticipantAddedResponse;
+              case SSEEventType.CLOSED_SESSION:
+                get().stopSSE();
+                set({
+                  viewerSessionInfo: null,
+                  viewerStatus: ViewerStatus.SESSION_CLOSED,
+                }); // viewer 세션 정보 초기화
+                break;
 
-                  newState.contentsSessionInfo = {
-                    ...(get().contentsSessionInfo || {}),
-                    maxGroupParticipants,
-                    totalParticipants: currentParticipants || 0,
+              case SSEEventType.PARTICIPANT_JOINED_SESSION:
+                const { maxGroupParticipants, currentParticipants, participant } =
+                  eventData as EVENT_ParticipantAddedResponse;
+
+                newState.contentsSessionInfo = {
+                  ...(get().contentsSessionInfo || {}),
+                  maxGroupParticipants,
+                  totalParticipants: currentParticipants || 0,
+                };
+                const newCurrentParticipants = [...(get().currentParticipants ?? []), participant];
+
+                newState.currentParticipants = newCurrentParticipants;
+                break;
+
+              //LEGACY
+              case SSEEventType.PARTICIPANT_KICKED_SESSION:
+              case SSEEventType.PARTICIPANT_LEFT_SESSION: {
+                const removedData = eventData as EVENT_ParticipantRemovededResponse;
+                const previoustParticipants = get().currentParticipants ?? [];
+                const {
+                  participant: removedParticipant,
+                  maxGroupParticipants,
+                  currentParticipants,
+                } = removedData;
+                const newParticipants = previoustParticipants.filter(
+                  (participant: ParticipantResponseType) =>
+                    participant.viewerId !== removedParticipant.viewerId,
+                );
+
+                newState.contentsSessionInfo = {
+                  ...(get().contentsSessionInfo || {}),
+                  maxGroupParticipants,
+                  totalParticipants: currentParticipants,
+                };
+                newState.currentParticipants = newParticipants.map((participant) => {
+                  const updated = {
+                    ...participant,
+                    order: participant.order - 1,
                   };
-                  const newCurrentParticipants = [
-                    ...(get().currentParticipants ?? []),
-                    participant,
-                  ];
+                  return updated;
+                });
+                console.log(newParticipants);
+                break;
+              }
+              case SSEEventType.PARTICIPANT_FIXED_SESSION: {
+                const fixedData = eventData as EVENT_ParticipantRemovededResponse;
+                const previoustParticipants = get().currentParticipants ?? [];
+                const { participant: fixedParticipant } = fixedData;
+                const nonFixedPariticipants = previoustParticipants.filter(
+                  (participant: ParticipantResponseType) =>
+                    participant.viewerId !== fixedParticipant.viewerId,
+                );
 
-                  newState.currentParticipants = newCurrentParticipants;
-                  break;
+                newState.currentParticipants = [fixedParticipant, ...nonFixedPariticipants];
+                break;
+              }
 
-                //LEGACY
-                case SSEEventType.PARTICIPANT_KICKED_SESSION:
-                case SSEEventType.PARTICIPANT_LEFT_SESSION: {
-                  const removedData = eventData as EVENT_ParticipantRemovededResponse;
-                  const previoustParticipants = get().currentParticipants ?? [];
-                  const {
-                    participant: removedParticipant,
-                    maxGroupParticipants,
-                    currentParticipants,
-                  } = removedData;
-                  const newParticipants = previoustParticipants.filter(
-                    (participant: ParticipantResponseType) =>
-                      participant.viewerId !== removedParticipant.viewerId,
-                  );
+              case SSEEventType.STREAMER_SESSION_UPDATED:
+                newState.contentsSessionInfo = {
+                  ...(get().contentsSessionInfo || {}),
+                  ...(eventData as EVENT_SessionStatusUpdateResponse),
+                };
 
-                  newState.contentsSessionInfo = {
-                    ...(get().contentsSessionInfo || {}),
-                    maxGroupParticipants,
-                    totalParticipants: currentParticipants,
-                  };
-                  newState.currentParticipants = newParticipants.map((participant) => {
-                    const updated = {
-                      ...participant,
-                      order: participant.order - 1,
-                    };
-                    return updated;
-                  });
-                  console.log(newParticipants);
-                  break;
-                }
-                case SSEEventType.PARTICIPANT_FIXED_SESSION: {
-                  const fixedData = eventData as EVENT_ParticipantRemovededResponse;
-                  const previoustParticipants = get().currentParticipants ?? [];
-                  const { participant: fixedParticipant } = fixedData;
-                  const nonFixedPariticipants = previoustParticipants.filter(
-                    (participant: ParticipantResponseType) =>
-                      participant.viewerId !== fixedParticipant.viewerId,
-                  );
-
-                  newState.currentParticipants = [fixedParticipant, ...nonFixedPariticipants];
-                  break;
-                }
-
-                case SSEEventType.STREAMER_SESSION_UPDATED:
-                  newState.contentsSessionInfo = {
-                    ...(get().contentsSessionInfo || {}),
-                    ...(eventData as EVENT_SessionStatusUpdateResponse),
-                  };
-
-                  if (get().viewerSessionInfo) {
-                    newState.viewerSessionInfo = {
-                      ...(get().viewerSessionInfo || {}),
-                      ...(eventData as EVENT_ParticipantOrderUpdated),
-                    };
-                  }
-                  break;
-
-                case SSEEventType.SESSION_ORDER_UPDATED:
-                case SSEEventType.UPDATED_SESSION:
+                if (get().viewerSessionInfo) {
                   newState.viewerSessionInfo = {
                     ...(get().viewerSessionInfo || {}),
                     ...(eventData as EVENT_ParticipantOrderUpdated),
                   };
-                  break;
-
-                case SSEEventType.LEFT_SESSION:
-                  console.log('📩 참가자 세션 종료 이벤트 발생');
-                  get().stopSSE(); // 기존 stopSSE 함수 호출하여 안전하게 종료
-                  set({
-                    viewerSessionInfo: null,
-                    viewerStatus: ViewerStatus.DISCONNECTED,
-                  }); // viewer 세션 정보 초기화
-                  break;
-
-                case SSEEventType.KICKED_SESSION: {
-                  console.log('📩 참가자 세션 강퇴 이벤트 발생');
-                  get().stopSSE(); // 기존 stopSSE 함수 호출하여 안전하게 종료
-                  set({
-                    viewerSessionInfo: null,
-                    viewerStatus: ViewerStatus.KICKED,
-                  }); // viewer 세션 정보 초기화
-                  break;
                 }
+                break;
 
-                default:
-                  console.log('📩 세션 이벤트 수신:', eventData);
+              case SSEEventType.SESSION_ORDER_UPDATED:
+              case SSEEventType.UPDATED_SESSION:
+                newState.viewerSessionInfo = {
+                  ...(get().viewerSessionInfo || {}),
+                  ...(eventData as EVENT_ParticipantOrderUpdated),
+                };
+                break;
+
+              case SSEEventType.LEFT_SESSION:
+                console.log('📩 참가자 세션 종료 이벤트 발생');
+                get().stopSSE(); // 기존 stopSSE 함수 호출하여 안전하게 종료
+                set({
+                  viewerSessionInfo: null,
+                  viewerStatus: ViewerStatus.DISCONNECTED,
+                }); // viewer 세션 정보 초기화
+                break;
+
+              case SSEEventType.KICKED_SESSION: {
+                console.log('📩 참가자 세션 강퇴 이벤트 발생');
+                get().stopSSE(); // 기존 stopSSE 함수 호출하여 안전하게 종료
+                set({
+                  viewerSessionInfo: null,
+                  viewerStatus: ViewerStatus.KICKED,
+                }); // viewer 세션 정보 초기화
+                break;
               }
 
-              set(newState); // 상태 업데이트
-            });
+              default:
+                console.log('📩 세션 이벤트 수신:', eventData);
+            }
+
+            set(newState); // 상태 업데이트
           });
-          newEventSource.onmessage = (event) => {
-            set({ ...state, lastEventId: event.lastEventId });
-            console.log('메세지 수신', event.data.data.message);
-          };
+        });
 
-          newEventSource.onerror = (isSessionError) => {
-            console.log('SSE오류 발생~', isSessionError);
-            newEventSource.close();
-            set({ isConnected: false, eventSource: newEventSource, isSessionError: true });
-          };
+        //자동재연경, backOff로직
+        newEventSource.onerror = (isSessionError) => {
+          console.log('❌ SSE 오류 발생 - 재연결 시도 예정', isSessionError);
+          newEventSource.close();
 
-          return {
-            eventSource: newEventSource,
-            isConnected: true,
-            isSessionError: false,
-          };
+          set({
+            isConnected: false,
+            eventSource: null,
+            isSessionError: true,
+          });
+
+          // 3초 후 재연결 시도
+          setTimeout(() => {
+            if (!get().isConnected) {
+              console.log('🔁 SSE 재연결 시도...');
+              get().startSSE(url);
+            }
+          }, 3000);
+
+          set({ isConnected: false, eventSource: newEventSource, isSessionError: true });
+        };
+
+        set({
+          eventSource: newEventSource,
+          isConnected: true,
+          isSessionError: false,
         });
       },
     }),
