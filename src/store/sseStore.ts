@@ -6,6 +6,7 @@ export enum ViewerStatus {
   SESSION_CLOSED = 'SESSION_CLOSED', // 스트리머가 세션 종료함
   DISCONNECTED = 'DISCONNECTED', // 연결이 끊긴 상태
   KICKED = 'KICKED', //강퇴당한 상태
+  LEFT = 'LEFT', // 시청자가 세션을 떠난 상태
 }
 
 type SSEState = {
@@ -23,6 +24,7 @@ type SSEState = {
   viewerStatus: ViewerStatus | null;
   setProcessing: (value: boolean) => void;
   setSessionError: (value: boolean) => void;
+  setViewerStatus: (value: ViewerStatus) => void;
   isRehydrated: boolean; // 상태가 로드 완료되었는지 여부 추가
   setCurrentParticipants: (newCurrentParticipants: ParticipantResponseType[]) => void;
   setViewerNickname: (viewerNickname: string) => void;
@@ -118,6 +120,13 @@ export const useSSEStore = create<SSEState>()(
         set((state) => ({
           ...state,
           viewerNickname,
+        }));
+      },
+
+      setViewerStatus: (viewerStatus) => {
+        set((state) => ({
+          ...state,
+          viewerStatus,
         }));
       },
       setProcessing: (value) => set({ isProcessing: value }),

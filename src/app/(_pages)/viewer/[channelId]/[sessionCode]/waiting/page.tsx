@@ -31,6 +31,7 @@ export default function Page() {
     viewerStatus,
     viewerNickname,
     startSSE,
+    setViewerStatus,
     isRehydrated: isViewerInfoLoading = false,
   } = useSSEStore();
   //세션인포 찾기
@@ -55,12 +56,13 @@ export default function Page() {
   useEffect(() => {
     if (viewerStatus === ViewerStatus.KICKED) {
       toast.success('시참에서 강퇴처리되었습니다.');
+      setViewerStatus(ViewerStatus.DISCONNECTED);
       router.replace(parentPath + '/ban');
     } else if (viewerStatus === ViewerStatus.SESSION_CLOSED) {
       toast.success('시참이 종료되었습니다.');
       router.replace(parentPath);
     }
-  }, [parentPath, router, viewerStatus]);
+  }, [parentPath, router, setViewerStatus, viewerStatus]);
 
   const [gameCode, setGameCode] = useState<string | null>(null);
 
@@ -123,8 +125,8 @@ export default function Page() {
               <div className="text-bold-small">
                 <span className="text-secondary">참여 코드</span>를 입력해서 게임에 참여해주세요
               </div>
-              <div className="mt-1 flex w-full flex-row items-center justify-center text-bold-large">
-                <span className="overflow-hidden truncate whitespace-nowrap">{gameCode}</span>
+              <div className="mt-1 flex flex-row items-center text-bold-large">
+                {gameCode}
                 <CopyIcon
                   width={16}
                   height={16}
