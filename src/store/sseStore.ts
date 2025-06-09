@@ -6,6 +6,7 @@ export enum ViewerStatus {
   SESSION_CLOSED = 'SESSION_CLOSED', // 스트리머가 세션 종료함
   DISCONNECTED = 'DISCONNECTED', // 연결이 끊긴 상태
   KICKED = 'KICKED', //강퇴당한 상태
+  LEFT = 'LEFT', // 시청자가 세션을 떠난 상태
 }
 
 type SSEState = {

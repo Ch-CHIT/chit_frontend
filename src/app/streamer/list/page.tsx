@@ -157,14 +157,16 @@ export default function List() {
   //이벤트 발생에 따른 로드
   useEffect(() => {
     if (currentParticipants) {
+      // 1. status가 LEFT인 참가자는 제외
+
       queryClient.setQueryData<InfiniteParticipantsData>(
         ['participants'],
         (oldData: InfiniteParticipantsData | undefined) => {
           if (!oldData) return;
           const oldParticipants = oldData.pages.flatMap((page) => page.participants || []);
+          let newParticipants = mergeParticipants(oldParticipants, currentParticipants);
 
-          const newParticipants = mergeParticipants(oldParticipants, currentParticipants);
-
+          newParticipants = newParticipants.filter((p) => p.status !== 'LEFT');
           // //이벤트로 발생한 데이터와 페이지네이션으로 데이터 발생시 통합 관리
           // let newParticipants: ParticipantResponseType[] = [];
           // if (Array.isArray(currentParticipants) && currentParticipants.length > 0) {
@@ -200,7 +202,6 @@ export default function List() {
 
   useEffect(() => {
     setIsSession(true);
-
     return () => {
       // 언마운트 시 false로
       if (nextPath === '/settings') {
@@ -229,7 +230,7 @@ export default function List() {
     }
 
     return filteredParticipants;
-  }, [data?.pages, menu, currentParticipants]);
+  }, [data?.pages, menu]);
 
   const loadMoreData = async () => {
     if (!hasNextPage || isFetchingNextPage) return;
