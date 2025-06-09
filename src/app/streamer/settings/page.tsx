@@ -13,16 +13,22 @@ import useContentsSessionStore from '@/store/sessionStore';
 import { useSSEStore } from '@/store/sseStore';
 import useAuthStore from '@/store/authStore';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+import { heartBeat } from '@/services/common/common';
 
 export default function Settings() {
   const [maxGroupParticipants, setmaxGroupParticipants] = useState(1);
   const router = useRouter();
-  const { eventSource } = useSSEStore((state) => state);
+  const { eventSource, sessionCode, isRehydrated: sseRehydrated } = useSSEStore((state) => state);
   const accessToken = useAuthStore((state) => state.accessToken);
   const { streamerInfo } = useChannelStore((state) => state);
-  const { setSessionInfo, setIsSession, isSession } = useContentsSessionStore((state) => state);
+  const {
+    setSessionInfo,
+    setIsSession,
+    isSession,
+    isRehydrated: contentsRehydrated,
+  } = useContentsSessionStore((state) => state);
 
   //브라우저 종료시 실행되는 콜백 함수
   const handleExit = async () => {
@@ -59,6 +65,25 @@ export default function Settings() {
       setmaxGroupParticipants(numericValue);
     }
   };
+
+  //하트비트 체크
+  useEffect(() => {
+    if (!sseRehydrated || !contentsRehydrated) {
+      return;
+    }
+    if (isSession && accessToken) {
+      heartBeat(accessToken, sessionCode);
+      console.log('🔵 하트비트 체크 시작', accessToken, sessionCode);
+      const intervalId = setInterval(() => {
+        heartBeat(accessToken, sessionCode);
+        console.log('두근');
+      }, 10000); // 10초
+
+      return () => {
+        clearInterval(intervalId);
+      };
+    }
+  }, [accessToken, contentsRehydrated, isSession, sessionCode, sseRehydrated]);
 
   const onClickCreateSession = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // 기본 제출 동작 방지
