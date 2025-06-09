@@ -23,6 +23,7 @@ type SSEState = {
   viewerStatus: ViewerStatus | null;
   setProcessing: (value: boolean) => void;
   setSessionError: (value: boolean) => void;
+  setViewerStatus: (value: ViewerStatus) => void;
   isRehydrated: boolean; // 상태가 로드 완료되었는지 여부 추가
   setCurrentParticipants: (newCurrentParticipants: ParticipantResponseType[]) => void;
   setViewerNickname: (viewerNickname: string) => void;
@@ -118,6 +119,13 @@ export const useSSEStore = create<SSEState>()(
         set((state) => ({
           ...state,
           viewerNickname,
+        }));
+      },
+
+      setViewerStatus: (viewerStatus) => {
+        set((state) => ({
+          ...state,
+          viewerStatus,
         }));
       },
       setProcessing: (value) => set({ isProcessing: value }),

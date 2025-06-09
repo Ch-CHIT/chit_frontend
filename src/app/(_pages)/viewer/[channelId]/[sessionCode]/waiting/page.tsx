@@ -31,6 +31,7 @@ export default function Page() {
     viewerStatus,
     viewerNickname,
     startSSE,
+    setViewerStatus,
     isRehydrated: isViewerInfoLoading = false,
   } = useSSEStore();
   //세션인포 찾기
@@ -55,12 +56,13 @@ export default function Page() {
   useEffect(() => {
     if (viewerStatus === ViewerStatus.KICKED) {
       toast.success('시참에서 강퇴처리되었습니다.');
+      setViewerStatus(ViewerStatus.DISCONNECTED);
       router.replace(parentPath + '/ban');
     } else if (viewerStatus === ViewerStatus.SESSION_CLOSED) {
       toast.success('시참이 종료되었습니다.');
       router.replace(parentPath);
     }
-  }, [parentPath, router, viewerStatus]);
+  }, [parentPath, router, setViewerStatus, viewerStatus]);
 
   const [gameCode, setGameCode] = useState<string | null>(null);
 
