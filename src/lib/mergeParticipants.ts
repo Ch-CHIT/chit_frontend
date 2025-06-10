@@ -12,12 +12,19 @@ export function mergeParticipants(
   oldParticipants: ParticipantResponseType[],
   currentParticipants: ParticipantResponseType[],
 ): ParticipantResponseType[] {
-  const map = new Map<number, ParticipantResponseType>();
+  // const currentIds = new Set(currentParticipants.map((p) => p.viewerId));
+  const result: ParticipantResponseType[] = [];
 
-  // 기존 참가자 먼저 삽입
-  oldParticipants.forEach((p) => map.set(p.viewerId, p));
-  // 최신 참가자 덮어쓰기
-  currentParticipants.forEach((p) => map.set(p.viewerId, p));
+  currentParticipants.forEach((participant) => {
+    result.push(participant); // current 기준으로 무조건 포함
+  });
 
-  return Array.from(map.values()); // 정렬 없음
+  // 만약 currentParticipants에 없는 기존 참가자를 유지하고 싶다면 아래 추가 (지금은 제거!)
+  // oldParticipants.forEach((p) => {
+  //   if (currentIds.has(p.viewerId)) {
+  //     result.push(p); // 중복 방지 필요
+  //   }
+  // });
+
+  return result;
 }
