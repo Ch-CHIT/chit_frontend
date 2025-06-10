@@ -10,20 +10,13 @@ import useAuthStore from '@/store/authStore';
 import { useQueryClient } from '@tanstack/react-query';
 
 type Props = {
-  refreshUsers: () => void;
   memberId: number;
   chzzkNickname: string;
   gameNicname: string;
   isHeart: boolean;
 };
 
-export default function MemberCard({
-  refreshUsers,
-  memberId,
-  chzzkNickname,
-  gameNicname,
-  isHeart,
-}: Props) {
+export default function MemberCard({ memberId, chzzkNickname, gameNicname, isHeart }: Props) {
   //하트 클릭하면 변경
   const queryClient = useQueryClient();
   const { accessToken } = useAuthStore();
@@ -41,7 +34,7 @@ export default function MemberCard({
     queryClient.refetchQueries({ queryKey: ['participants'] });
     const response = await deleteContentsSessionParticipant(accessToken, memberId);
     if (response.success) {
-      refreshUsers();
+      queryClient.invalidateQueries({ queryKey: ['participants'] });
       toast.success('유저를 추방했습니다.');
     }
   };
