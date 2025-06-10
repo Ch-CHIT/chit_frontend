@@ -92,6 +92,7 @@ export default function List() {
   const [isSessionOn, setIsSessionOn] = useState<SessionStatus>(SessionStatus.INITIAL);
   const [menu, setMenu] = useState(0); // 0 전체인원 1/고정인원/2현재인원
   const router = useRouter();
+  const maxGroupParticipants = sessionInfo?.maxGroupParticipants ?? 1;
   const {
     data,
     fetchNextPage,
@@ -102,12 +103,14 @@ export default function List() {
     queryKey: ['participants'],
     enabled: !!accessToken && isSessionOn !== SessionStatus.CLOSED,
     queryFn: async ({ pageParam = 1 }) => {
+      console.log('돌고');
       const response = await fetchParticipantsData({
         pageParam,
         accessToken,
         size: 10,
       });
       if (response.success) {
+        console.log('fetchParticipantsData', response.data);
         return response.data;
       }
       return {
@@ -154,46 +157,46 @@ export default function List() {
     }
   };
 
-  //이벤트 발생에 따른 로드
   useEffect(() => {
     if (currentParticipants) {
-      // 1. status가 LEFT인 참가자는 제외
-
       queryClient.setQueryData<InfiniteParticipantsData>(
         ['participants'],
         (oldData: InfiniteParticipantsData | undefined) => {
+          console.log('currentParticipants', currentParticipants);
+          if (currentParticipants.length === 0) {
+            return {
+              pages: [{ participants: currentParticipants, nextPage: undefined }],
+              pageParams: [0],
+            };
+          }
           if (!oldData) return;
+
           const oldParticipants = oldData.pages.flatMap((page) => page.participants || []);
+
+          // ✅ 1. 병합
           let newParticipants = mergeParticipants(oldParticipants, currentParticipants);
 
+          // ✅ 2. LEFT 상태 제거
           newParticipants = newParticipants.filter((p) => p.status !== 'LEFT');
-          // //이벤트로 발생한 데이터와 페이지네이션으로 데이터 발생시 통합 관리
-          // let newParticipants: ParticipantResponseType[] = [];
-          // if (Array.isArray(currentParticipants) && currentParticipants.length > 0) {
-          //   // 기존 + 새 participants 통합 후 필터링
 
-          //   const currentIds = new Set(currentParticipants.map((p) => p.viewerId));
-          //   const oldParticipants = oldData.pages.flatMap((page: any) => page.participants || []);
-          //   // 기존 참가자 중 current에 아직 남아 있는 유저만 유지 (나간 유저 제거 및 중복삭제)
-          //   newParticipants = oldParticipants.filter((p) => currentIds.has(p.viewerId) === false); // current에 없는 유저만 유지해서 중복 제거
-
-          //   // current에는 최신 유저 상태가 들어있으므로 우선순위로 맨 앞에 붙인다
-          //   newParticipants = [...currentParticipants];
-          // }
-
+          // ✅ 3. 정렬 (fixedPick 우선 + order 순)
           newParticipants.sort((a, b) => {
-            if (a.fixedPick === b.fixedPick) {
-              return a.order - b.order;
+            // 고정인원 우선 정렬
+            if (a.fixedPick === true && b.fixedPick !== true) {
+              return -1; // a가 고정인원이면 a가 먼저
+            } else if (a.fixedPick !== true && b.fixedPick === true) {
+              return 1; // b가 고정인원이면 b가 먼저
             }
-            return b.fixedPick ? 1 : -1;
+            // 고정인원이 아니면 round 순으로 정렬
+            if (a.fixedPick === false && b.fixedPick === false) {
+              return a.round - b.round; // order 순으로 정렬
+            }
           });
 
+          // ✅ 4. 전체를 하나의 페이지로 다시 구성
           return {
-            ...oldData,
-            pages: [
-              { ...oldData.pages[0], participants: newParticipants },
-              ...oldData.pages.slice(1),
-            ],
+            pages: [{ participants: newParticipants, nextPage: undefined }],
+            pageParams: [0],
           };
         },
       );
@@ -216,6 +219,7 @@ export default function List() {
 
   const participants = useMemo(() => {
     let filteredParticipants = data?.pages.flatMap((p) => p.participants || []) ?? [];
+
     if (filteredParticipants.length > 0) {
       if (menu === 1) {
         //고정인원만 출력
@@ -223,14 +227,17 @@ export default function List() {
           (participant) => participant.fixedPick === true,
         );
       } else if (menu === 2) {
-        filteredParticipants = filteredParticipants.filter(
-          (participant) => participant.round === 1, //현재 순서인 사람만 추가
-        );
+        const min = Math.min(...filteredParticipants.map((p) => p.round));
+        filteredParticipants = filteredParticipants
+          .filter(
+            (participant) => participant.round === min, //현재 순서인 사람만 추가
+          )
+          .slice(0, maxGroupParticipants); // 최대 그룹 인원만
       }
     }
 
     return filteredParticipants;
-  }, [data?.pages, menu]);
+  }, [data?.pages, maxGroupParticipants, menu]);
 
   const loadMoreData = async () => {
     if (!hasNextPage || isFetchingNextPage) return;
@@ -255,10 +262,9 @@ export default function List() {
   //세션 생성 함수
   const onCreateSession = async () => {
     if (sessionInfo && accessToken) {
-      const { gameParticipationCode, maxGroupParticipants } = sessionInfo;
       const reqData = {
-        gameParticipationCode,
-        maxGroupParticipants,
+        gameParticipationCode: sessionInfo.gameParticipationCode,
+        maxGroupParticipants: sessionInfo.maxGroupParticipants,
       };
 
       const response = await createContentsSession(reqData, accessToken);
@@ -369,9 +375,8 @@ export default function List() {
     isSessionOn,
   ]);
 
-  console.log(currentParticipants);
+  console.log(participants);
   if (!isTokenLoading) return <div>로딩중입니다.</div>;
-  const maxGroupParticipants = sessionInfo?.maxGroupParticipants ?? 1;
   return (
     <CommonLayout>
       {isTokenLoading && sessionInfo && (
