@@ -10,11 +10,7 @@ type Props = {
   ) => void | Promise<void>;
 };
 
-export default function BtnWithChildren({
-  onClickHandler,
-  children,
-  type = 'default',
-}: Props) {
+export default function BtnWithChildren({ onClickHandler, children, type = 'default' }: Props) {
   const buttonStyles = {
     alert: 'alert', // 경고 버튼
     disable: 'disable', // 비활성화 버튼

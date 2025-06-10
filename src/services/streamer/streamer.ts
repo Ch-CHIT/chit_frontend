@@ -216,3 +216,23 @@ export const deleteContentsSessionParticipant = async (
     return { success: false, error: handleError(error) }; // 에러 핸들링 함수 사용
   }
 };
+//세션에서 참가자 추방
+export const getContentsSessionStatus = async (
+  channelId: string,
+  accessToken: string,
+): Promise<Result<{ isOpen: boolean }>> => {
+  try {
+    const response = await sessionClient.get(
+      `${SESSION_URLS.contentsSession}/${channelId}/status`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`, // accessToken을 Bearer 토큰으로 추가
+        },
+      },
+    );
+
+    return { success: true, data: response.data.data }; // 성공적인 응답 데이터 반환
+  } catch (error: unknown) {
+    return { success: false, error: handleError(error) }; // 에러 핸들링 함수 사용
+  }
+};
