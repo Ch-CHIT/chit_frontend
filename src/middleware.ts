@@ -13,13 +13,20 @@ export function middleware(request: NextRequest) {
   }
 
   // 로그인 페이지로 보내기 전에 최초 요청을 통해 쿠키를 설정해 Role을 결정합니다.
-  if (!hasCookie || !role?.value) {
+  if (!role?.value || !hasCookie) {
     console.debug('쿠키 또는 역할 값이 없어 리다이렉트를 시작합니다.');
     const redirectUrl = request.nextUrl.clone();
     console.debug('redirectUrl', redirectUrl.pathname);
     let responseWithCookie = NextResponse.redirect(redirectUrl);
-
-    if (!role) {
+    if (!hasCookie && redirectUrl.pathname !== '/login') {
+      if (segments.includes('streamer')) {
+        console.log('스트리머 역할 쿠키 설정');
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.pathname = '/login';
+        responseWithCookie = NextResponse.redirect(redirectUrl);
+      }
+      return responseWithCookie;
+    } else if (!role) {
       if (segments.includes('viewer')) {
         responseWithCookie.cookies.set('CH_ROLE', 'VIEWER', {
           path: '/',
@@ -76,5 +83,5 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 export const config = {
-  matcher: ['/streamer/:path*', '/viewer/:channelId/:sessionCode/:path*', '/:path'],
+  matcher: ['/streamer/:path*', '/viewer/:channelId/:sessionCode/:path*', '/login'],
 };
