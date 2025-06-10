@@ -7,7 +7,6 @@ import useContentsSessionStore from '@/store/sessionStore';
 import { StreamerInfo } from '@/services/streamer/type';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-
 type BtnLoginProps = {
   channelId: string;
   sessionCode: string;
@@ -30,7 +29,6 @@ const BtnViewerLogin = ({
   } = useChannelStore((state) => state);
   const setSessionInfo = useContentsSessionStore((state) => state.setSessionInfo);
   const accessToken = useAuthStore((state) => state.accessToken);
-
   const channelId = paramsChannelId ?? stateChannelId;
   const sessionCode = paramsSessionCode ?? stateSessionCode;
 
@@ -63,7 +61,9 @@ const BtnViewerLogin = ({
   };
 
   return (
-    <BtnWithChildren onClickHandler={onClickLogin}>로그인하고 3초만에 시참참여하기</BtnWithChildren>
+    <BtnWithChildren type={'default'} onClickHandler={onClickLogin}>
+      로그인하고 3초만에 시참참여하기
+    </BtnWithChildren>
   );
 };
 

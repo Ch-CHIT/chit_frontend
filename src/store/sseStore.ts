@@ -241,6 +241,7 @@ export const useSSEStore = create<SSEState>()(
                   };
                   return updated;
                 });
+                console.log('📩 참가자 세션 종료 이벤트 발생');
                 console.log(newParticipants);
                 break;
               }
