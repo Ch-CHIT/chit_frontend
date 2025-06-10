@@ -18,14 +18,16 @@ export function middleware(request: NextRequest) {
     const redirectUrl = request.nextUrl.clone();
     console.debug('redirectUrl', redirectUrl.pathname);
     let responseWithCookie = NextResponse.redirect(redirectUrl);
-    if (!hasCookie && redirectUrl.pathname !== '/login') {
+    if (!hasCookie && redirectUrl.pathname !== '/login' && !segments.includes('viewer')) {
       if (segments.includes('streamer')) {
-        console.log('스트리머 역할 쿠키 설정');
         const redirectUrl = request.nextUrl.clone();
         redirectUrl.pathname = '/login';
         responseWithCookie = NextResponse.redirect(redirectUrl);
+
+        return responseWithCookie;
+      } else {
+        return NextResponse.next();
       }
-      return responseWithCookie;
     } else if (!role) {
       if (segments.includes('viewer')) {
         responseWithCookie.cookies.set('CH_ROLE', 'VIEWER', {
