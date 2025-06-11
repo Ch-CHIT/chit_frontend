@@ -7,13 +7,14 @@ import {
   createContentsSession,
   deleteContentsSession,
   getContentsSessionInfo,
+  getContentsSessionStatus,
   putContentsSessionNextGroup,
 } from '@/services/streamer/streamer';
 import useChannelStore from '@/store/channelStore';
 import useContentsSessionStore from '@/store/sessionStore';
 import { ParticipantResponseType, useSSEStore } from '@/store/sseStore';
 import useAuthStore from '@/store/authStore';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import ViewerList from '@/components/molecules/ViewerList';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
@@ -89,6 +90,8 @@ export default function List() {
   const channelId = useChannelStore((state) => state.channelId);
   const isTokenLoading = useAuthStore((state) => state.isRehydrated);
   const [isSessionOn, setIsSessionOn] = useState<SessionStatus>(SessionStatus.INITIAL);
+  const [isSessionOpen, setIsSessionOpen] = useState(true);
+
   const [menu, setMenu] = useState(0); // 0 전체인원 1/고정인원/2현재인원
   const router = useRouter();
   const maxGroupParticipants = sessionInfo?.maxGroupParticipants ?? 1;
@@ -217,6 +220,18 @@ export default function List() {
     await fetchNextPage();
   };
 
+  const fetchSessionStatus = useCallback(async () => {
+    if (!channelId && !accessToken) return;
+
+    const response = await getContentsSessionStatus(channelId, accessToken);
+    if (response.success) {
+      const { isOpen } = response.data;
+      setIsSessionOpen(isOpen);
+
+      return isOpen;
+    }
+  }, [accessToken, channelId]);
+
   //하트비트 체크
   useEffect(() => {
     if (sessionCode && accessToken) {
@@ -231,6 +246,22 @@ export default function List() {
       };
     }
   }, [accessToken, isTokenLoading, sessionCode]);
+
+  useEffect(() => {
+    if (!accessToken || !channelId) return;
+
+    // 최초 한 번 실행
+    fetchSessionStatus();
+
+    // 30초마다 polling
+    const intervalId = setInterval(() => {
+      fetchSessionStatus();
+    }, 15 * 1000); // 30초
+
+    return () => {
+      clearInterval(intervalId); // 정리
+    };
+  }, [accessToken, channelId, fetchSessionStatus]);
 
   //세션 생성 함수
   const onCreateSession = async () => {
@@ -280,6 +311,7 @@ export default function List() {
       startSSE(url);
       setSessionInfo(response.data.data);
       setIsSessionOn(SessionStatus.OPEN);
+      setIsSessionOpen(true);
       toast.success('시참이 시작되었습니다.');
       return;
     }
@@ -306,7 +338,8 @@ export default function List() {
         try {
           resetSSEStore();
           resetContentsSession();
-          router.push('/');
+          setIsSessionOpen(false);
+          // router.push('/');
         } finally {
           setProcessing(false); // 라우팅 후 unlock
         }
@@ -331,8 +364,10 @@ export default function List() {
       !isConnected &&
       isSessionOn !== SessionStatus.CLOSED &&
       !isSessionError &&
-      !isProcessing
+      !isProcessing &&
+      isSessionOpen // 이 조건 추가
     ) {
+      if (isSessionOpen) return;
       console.log('🔄 SSE 자동 시작');
       const url = makeUrl({ accessToken, sessionCode: sessionInfo?.sessionCode });
       startSSE(url);
@@ -346,6 +381,7 @@ export default function List() {
     sessionInfo?.sessionCode,
     startSSE,
     isSessionOn,
+    isSessionOpen, // 이거 추가
   ]);
 
   console.log(participants);
@@ -353,7 +389,9 @@ export default function List() {
   return (
     <CommonLayout>
       {isTokenLoading && sessionInfo && (
-        <div className="flex h-full w-full flex-1 flex-col items-center justify-center">
+        <div
+          className={`flex h-full w-full flex-1 flex-col ${isSessionOpen ? 'justify-center' : 'justify-start'} items-center`}
+        >
           <section id="controlBox" className="w-full">
             <StreamerTools
               setNextPath={setNextPath}
@@ -363,61 +401,82 @@ export default function List() {
               channelId={channelId!}
             />
           </section>
-          <section id="infoBox" className="w-full">
-            {!isSessionOn ? (
-              <p className="mb-5 mt-4 text-bold-middle">시참을 시작해주세요</p>
-            ) : participants.length === 0 ? (
-              <p className="mb-5 mt-4 text-bold-middle">아직 참여자가 없어요</p>
-            ) : (
-              <p className="mb-5 mt-4 text-bold-middle">
-                총 <span className="text-primary">{participants.length}명</span>이 참여중이에요
-              </p>
-            )}
-          </section>
-          <section className="mb-3 flex min-h-[34px] w-full">
-            <div id="listNav " className="flex w-full flex-row justify-between">
-              <ul className="flex flex-row items-center text-medium-large">
-                <li
-                  className={`menutab cursor mr-3 cursor-pointer last:mr-0 ${menu === 0 ? 'text-bold-small text-primary underline underline-offset-4' : ''}`}
-                  onClick={() => setMenu(0)}
-                >
-                  전체 인원
-                </li>
-                <li
-                  className={`menutab cursor mr-3 cursor-pointer last:mr-0 ${menu === 1 ? 'text-bold-small text-primary underline underline-offset-4' : ''}`}
-                  onClick={() => setMenu(1)}
-                >
-                  고정 인원
-                </li>
-                <li
-                  className={`menutab cursor mr-3 cursor-pointer last:mr-0 ${menu === 2 ? 'text-bold-small text-primary underline underline-offset-4' : ''}`}
-                  onClick={() => setMenu(2)}
-                >
-                  현재 인원
-                </li>
-              </ul>
-              <div
-                onClick={nextPartyCallHandler}
-                className="cursor-pointer rounded-md bg-background-sub p-2 text-semi-bold text-secondary"
+          {!isSessionOpen ? (
+            <section id="infoBox" className="w-full">
+              <p className="mb-5 mt-4 text-bold-middle">⚠️ 현재 세션 연결이 끊어졌습니다.</p>
+              <p
+                className="w-fulltext-white"
+                // onClick={() => {
+                //   stopSSE();
+                //   startSSE(makeUrl({ accessToken, sessionCode: sessionInfo?.sessionCode }));
+                //   setIsSessionOpen(true); // 연결 시도하면 open으로 바꿈
+                // }}
               >
-                다음 파티 호출 🔈
-              </div>
-            </div>
-          </section>
-          <section className="w-full flex-1 overflow-y-auto">
-            {!isSessionOn ? (
-              <div>시참을 시작해주세요.</div>
-            ) : participants.length === 0 ? (
-              <div>유저를 기다리는 중입니다.</div>
-            ) : (
-              <ViewerList
-                participants={participants}
-                loadMoreItems={loadMoreData}
-                maxGroupParticipants={maxGroupParticipants}
-                key={'viewerList'}
-              ></ViewerList>
-            )}
-          </section>
+                시참 on off 버튼을 이용해서 다시 생성해주세요
+              </p>
+            </section>
+          ) : (
+            ''
+          )}
+          {isSessionOpen && (
+            <>
+              <section id="infoBox" className="w-full">
+                {!isSessionOn ? (
+                  <p className="mb-5 mt-4 text-bold-middle">시참을 시작해주세요</p>
+                ) : participants.length === 0 ? (
+                  <p className="mb-5 mt-4 text-bold-middle">아직 참여자가 없어요</p>
+                ) : (
+                  <p className="mb-5 mt-4 text-bold-middle">
+                    총 <span className="text-primary">{participants.length}명</span>이 참여중이에요
+                  </p>
+                )}
+              </section>
+              <section className="mb-3 flex min-h-[34px] w-full">
+                <div id="listNav " className="flex w-full flex-row justify-between">
+                  <ul className="flex flex-row items-center text-medium-large">
+                    <li
+                      className={`menutab cursor mr-3 cursor-pointer last:mr-0 ${menu === 0 ? 'text-bold-small text-primary underline underline-offset-4' : ''}`}
+                      onClick={() => setMenu(0)}
+                    >
+                      전체 인원
+                    </li>
+                    <li
+                      className={`menutab cursor mr-3 cursor-pointer last:mr-0 ${menu === 1 ? 'text-bold-small text-primary underline underline-offset-4' : ''}`}
+                      onClick={() => setMenu(1)}
+                    >
+                      고정 인원
+                    </li>
+                    <li
+                      className={`menutab cursor mr-3 cursor-pointer last:mr-0 ${menu === 2 ? 'text-bold-small text-primary underline underline-offset-4' : ''}`}
+                      onClick={() => setMenu(2)}
+                    >
+                      현재 인원
+                    </li>
+                  </ul>
+                  <div
+                    onClick={nextPartyCallHandler}
+                    className="cursor-pointer rounded-md bg-background-sub p-2 text-semi-bold text-secondary"
+                  >
+                    다음 파티 호출 🔈
+                  </div>
+                </div>
+              </section>
+              <section className="w-full flex-1 overflow-y-auto">
+                {!isSessionOn ? (
+                  <div>시참을 시작해주세요.</div>
+                ) : participants.length === 0 ? (
+                  <div>유저를 기다리는 중입니다.</div>
+                ) : (
+                  <ViewerList
+                    participants={participants}
+                    loadMoreItems={loadMoreData}
+                    maxGroupParticipants={maxGroupParticipants}
+                    key={'viewerList'}
+                  ></ViewerList>
+                )}
+              </section>
+            </>
+          )}
         </div>
       )}
     </CommonLayout>
