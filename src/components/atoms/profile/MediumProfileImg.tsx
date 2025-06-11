@@ -7,8 +7,8 @@ type MediumProfileImgProps = {
 };
 
 const MediumProfileImg = ({ imageUrl, status }: MediumProfileImgProps) => {
-  const defaultImage = ' /assets/logo/logo_small.svg';
-  const image = imageUrl ?? defaultImage;
+  const defaultImage = '/assets/logo/logo_small.svg';
+  const image = imageUrl?.trim() ? imageUrl : defaultImage;
 
   return (
     <div
@@ -17,7 +17,7 @@ const MediumProfileImg = ({ imageUrl, status }: MediumProfileImgProps) => {
       <Image
         src={image}
         fill
-        className={`${image ? 'object-cover' : 'object-contain p-3'}`}
+        className={`${imageUrl?.trim() ? 'object-cover' : 'object-contain p-3'}`}
         alt="profile"
       />
     </div>

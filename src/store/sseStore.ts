@@ -323,22 +323,12 @@ export const useSSEStore = create<SSEState>()(
         newEventSource.onerror = (isSessionError) => {
           console.log('❌ SSE 오류 발생 - 재연결 시도 예정', isSessionError);
           newEventSource.close();
-
+          get().stopSSE();
           set({
             isConnected: false,
             eventSource: null,
             isSessionError: true,
           });
-
-          // 3초 후 재연결 시도
-          setTimeout(() => {
-            if (!get().isConnected) {
-              console.log('🔁 SSE 재연결 시도...');
-              get().startSSE(url);
-            }
-          }, 3000);
-
-          set({ isConnected: false, eventSource: newEventSource, isSessionError: true });
         };
 
         set({
