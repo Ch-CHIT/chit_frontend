@@ -38,6 +38,11 @@ const nextConfig: NextConfig = {
         pathname: '/**',
         search: '',
       },
+      {
+        protocol: 'https',
+        hostname: 'chit-seven.vercel.app',
+        pathname: '/**',
+      },
     ],
   },
 };
