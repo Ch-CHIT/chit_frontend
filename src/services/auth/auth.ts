@@ -79,6 +79,7 @@ export const postRefresh = async ({
     if (response.status == 200) {
       return { success: true, data: data.data };
     }
+    return { success: false, error: data.error };
   } catch (error: unknown) {
     console.log(error);
     return { success: false, error: error as ErrorResponse }; // 에러 핸들링 함수 사용

@@ -15,7 +15,6 @@ import { ParticipantResponseType, useSSEStore } from '@/store/sseStore';
 import useAuthStore from '@/store/authStore';
 import { useState, useEffect, useMemo } from 'react';
 import { toast } from 'react-toastify';
-
 import ViewerList from '@/components/molecules/ViewerList';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import useDetectExit from '@/hooks/useDetectExit';
@@ -24,7 +23,7 @@ import { useRouter } from 'next/navigation';
 import { Result } from '@/services/streamer/type';
 import { logout } from '@/services/auth/auth';
 import { SessionStatus } from '@/constants/status';
-import { mergeParticipants } from '@/lib/mergeParticipants';
+import useLogout from '@/hooks/useLogout';
 
 interface getFetchParticipantsDataResponse {
   participants: ParticipantResponseType[];
@@ -103,7 +102,6 @@ export default function List() {
     queryKey: ['participants'],
     enabled: !!accessToken && isSessionOn !== SessionStatus.CLOSED,
     queryFn: async ({ pageParam = 1 }) => {
-      console.log('돌고');
       const response = await fetchParticipantsData({
         pageParam,
         accessToken,
@@ -125,6 +123,7 @@ export default function List() {
     getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined, // 다음 페이지 정보
     staleTime: 0,
   });
+  const resetLocal = useLogout();
 
   //브라우저 종료시 실행되는 콜백 함수
   const handleExit = async () => {
@@ -132,6 +131,7 @@ export default function List() {
     if (accessToken) {
       toast.warn('세션이 종료되었습니다.');
       await logout({ accessToken });
+      resetLocal();
 
       router.replace('/');
     }
@@ -149,11 +149,6 @@ export default function List() {
     const response = await putContentsSessionNextGroup({ accessToken });
     if (response.success) {
       toast.success('다음 파티를 호출 했습니다.');
-      queryClient.setQueryData(['participants'], () => ({
-        pages: [],
-        pageParams: [0],
-      })); // participants 호출
-      queryClient.refetchQueries({ queryKey: ['participants'] }); // 쿼리 재요청 (첫 페이지부터)
     }
   };
 
@@ -171,31 +166,9 @@ export default function List() {
           }
           if (!oldData) return;
 
-          const oldParticipants = oldData.pages.flatMap((page) => page.participants || []);
-
-          // ✅ 1. 병합
-          let newParticipants = mergeParticipants(oldParticipants, currentParticipants);
-
-          // ✅ 2. LEFT 상태 제거
-          newParticipants = newParticipants.filter((p) => p.status !== 'LEFT');
-
-          // ✅ 3. 정렬 (fixedPick 우선 + order 순)
-          newParticipants.sort((a, b) => {
-            // 고정인원 우선 정렬
-            if (a.fixedPick === true && b.fixedPick !== true) {
-              return -1; // a가 고정인원이면 a가 먼저
-            } else if (a.fixedPick !== true && b.fixedPick === true) {
-              return 1; // b가 고정인원이면 b가 먼저
-            }
-            // 고정인원이 아니면 round 순으로 정렬
-            if (a.fixedPick === false && b.fixedPick === false) {
-              return a.round - b.round; // order 순으로 정렬
-            }
-          });
-
           // ✅ 4. 전체를 하나의 페이지로 다시 구성
           return {
-            pages: [{ participants: newParticipants, nextPage: undefined }],
+            pages: [{ participants: currentParticipants, nextPage: undefined }],
             pageParams: [0],
           };
         },
