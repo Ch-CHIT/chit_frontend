@@ -1,4 +1,5 @@
 import { STORAGE_KEYS } from '@/constants/urls';
+import { ParticipantManager } from '@/lib/participantManager';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 export enum ViewerStatus {
@@ -12,6 +13,7 @@ export enum ViewerStatus {
 type SSEState = {
   contentsSessionInfo: SSEStateContentsSession | null;
   sessionCode: string | null;
+  participantManager: ParticipantManager | null;
   currentParticipants: ParticipantResponseType[] | null;
   eventSource: EventSource | null;
   lastEventId: string | null;
@@ -28,7 +30,7 @@ type SSEState = {
   isRehydrated: boolean; // 상태가 로드 완료되었는지 여부 추가
   setCurrentParticipants: (newCurrentParticipants: ParticipantResponseType[]) => void;
   setViewerNickname: (viewerNickname: string) => void;
-  startSSE: (url: string) => void;
+  startSSE: (url: string, data?: ParticipantResponseType[]) => void;
   stopSSE: () => void;
   reset: () => void;
 };
@@ -55,6 +57,7 @@ enum SSEEventType {
   CLOSED_SESSION = 'CLOSED_SESSION',
   UPDATED_SESSION = 'UPDATED_SESSION',
   STREAMER_SESSION_UPDATED = 'STREAMER_SESSION_UPDATED',
+  CALLED_NEXT_PARTY = 'CALLED_NEXT_PARTY',
 }
 
 export type ParticipantResponseType = {
@@ -91,6 +94,7 @@ interface EVENT_ParticipantOrderUpdated extends ParticipantResponseType {
 type viewerSessionInfo = EVENT_ParticipantOrderUpdated;
 const initialSSEState = {
   contentsSessionInfo: null,
+  participantManager: null,
   sessionCode: null,
   currentParticipants: null,
   eventSource: null,
@@ -141,6 +145,9 @@ export const useSSEStore = create<SSEState>()(
               console.log('SSE 종료 중 오류 발생:', isSessionError);
             }
           }
+          const manager = get().participantManager;
+          if (manager) manager.clear();
+
           return {
             eventSource: null,
             isConnected: false,
@@ -150,12 +157,14 @@ export const useSSEStore = create<SSEState>()(
           };
         });
       },
-      startSSE: (url) => {
+      startSSE: (url, data) => {
         if (get().isConnected) {
           console.log('⚠️ SSE가 연결되어 있음. 중복 구독 방지 요청 종료');
           get().stopSSE(); // 기존 SSE 연결 종료
         }
         console.log('🆕 새로운 SSE연결 시작');
+
+        const manager = new ParticipantManager(data);
         set({ isProcessing: true });
 
         console.log('새로운 SSE연결 시작');
@@ -182,7 +191,7 @@ export const useSSEStore = create<SSEState>()(
 
             switch (eventType) {
               // ✅ 공통 세션 참가 이벤트
-              case SSEEventType.JOINED_SESSION: //시청자에게 발생생
+              case SSEEventType.JOINED_SESSION: //시청자에게 발생생\
                 console.log('📩 세션참가이벤트:', eventData);
                 if (eventData) newState.sessionCode = eventData;
                 break;
@@ -200,7 +209,7 @@ export const useSSEStore = create<SSEState>()(
                 }); // viewer 세션 정보 초기화
                 break;
 
-              case SSEEventType.PARTICIPANT_JOINED_SESSION:
+              case SSEEventType.PARTICIPANT_JOINED_SESSION: {
                 const { maxGroupParticipants, currentParticipants, participant } =
                   eventData as EVENT_ParticipantAddedResponse;
 
@@ -209,56 +218,46 @@ export const useSSEStore = create<SSEState>()(
                   maxGroupParticipants,
                   totalParticipants: currentParticipants || 0,
                 };
-                const newCurrentParticipants = [...(get().currentParticipants ?? []), participant];
 
-                newState.currentParticipants = newCurrentParticipants;
+                manager.addOrUpdateParticipant(participant);
+                newState.currentParticipants = manager.getAllParticipants();
+
                 break;
-
+              }
               //LEGACY
               case SSEEventType.PARTICIPANT_KICKED_SESSION:
               case SSEEventType.PARTICIPANT_LEFT_SESSION: {
                 const removedData = eventData as EVENT_ParticipantRemovededResponse;
-                const previoustParticipants = get().currentParticipants ?? [];
                 const {
                   participant: removedParticipant,
                   maxGroupParticipants,
                   currentParticipants,
                 } = removedData;
-                const newParticipants = previoustParticipants.filter(
-                  (participant: ParticipantResponseType) =>
-                    participant.viewerId !== removedParticipant.viewerId,
-                );
 
                 newState.contentsSessionInfo = {
                   ...(get().contentsSessionInfo || {}),
                   maxGroupParticipants,
                   totalParticipants: currentParticipants,
                 };
-                newState.currentParticipants = newParticipants.map((participant) => {
-                  const updated = {
-                    ...participant,
-                    order: participant.order - 1,
-                  };
-                  return updated;
-                });
+
                 console.log('📩 참가자 세션 종료 이벤트 발생');
-                console.log(newParticipants);
+                console.log('삭제 전', manager.getAllParticipants());
+                manager.removeParticipant(removedParticipant.participantId);
+                console.log('삭제 후', manager.getAllParticipants());
+                newState.currentParticipants = manager.getAllParticipants();
                 break;
               }
+
               case SSEEventType.PARTICIPANT_FIXED_SESSION: {
                 const fixedData = eventData as EVENT_ParticipantRemovededResponse;
-                const previoustParticipants = get().currentParticipants ?? [];
                 const { participant: fixedParticipant } = fixedData;
-                const nonFixedPariticipants = previoustParticipants.filter(
-                  (participant: ParticipantResponseType) =>
-                    participant.viewerId !== fixedParticipant.viewerId,
-                );
 
-                newState.currentParticipants = [fixedParticipant, ...nonFixedPariticipants];
+                manager.fixedParticipant(fixedParticipant);
+                newState.currentParticipants = manager.getAllParticipants();
                 break;
               }
 
-              case SSEEventType.STREAMER_SESSION_UPDATED:
+              case SSEEventType.STREAMER_SESSION_UPDATED: {
                 newState.contentsSessionInfo = {
                   ...(get().contentsSessionInfo || {}),
                   ...(eventData as EVENT_SessionStatusUpdateResponse),
@@ -271,16 +270,28 @@ export const useSSEStore = create<SSEState>()(
                   };
                 }
                 break;
+              }
+
+              case SSEEventType.CALLED_NEXT_PARTY: {
+                console.log('📩 다음 파티 호출 이벤트 수신:', eventData);
+                const limitPerGroup = get().contentsSessionInfo?.maxGroupParticipants || 1;
+                manager.sendTopNToLastRound(limitPerGroup);
+                console.log(limitPerGroup, manager.getAllParticipants());
+                newState.currentParticipants = manager.getAllParticipants();
+
+                break;
+              }
 
               case SSEEventType.SESSION_ORDER_UPDATED:
-              case SSEEventType.UPDATED_SESSION:
+              case SSEEventType.UPDATED_SESSION: {
                 newState.viewerSessionInfo = {
                   ...(get().viewerSessionInfo || {}),
                   ...(eventData as EVENT_ParticipantOrderUpdated),
                 };
                 break;
+              }
 
-              case SSEEventType.LEFT_SESSION:
+              case SSEEventType.LEFT_SESSION: {
                 console.log('📩 참가자 세션 종료 이벤트 발생');
                 get().stopSSE(); // 기존 stopSSE 함수 호출하여 안전하게 종료
                 set({
@@ -288,6 +299,7 @@ export const useSSEStore = create<SSEState>()(
                   viewerStatus: ViewerStatus.DISCONNECTED,
                 }); // viewer 세션 정보 초기화
                 break;
+              }
 
               case SSEEventType.KICKED_SESSION: {
                 console.log('📩 참가자 세션 강퇴 이벤트 발생');

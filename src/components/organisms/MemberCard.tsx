@@ -24,8 +24,7 @@ export default function MemberCard({ memberId, chzzkNickname, gameNicname, isHea
     if (!accessToken) return;
     const response = await putContentsSessionParticipantPick(accessToken, memberId);
     if (response.success) {
-      queryClient.refetchQueries({ queryKey: ['participants'] });
-    } else {
+      toast.success('참가자를 고정했습니다 <3');
     }
   };
   const onClickBanHandler = async () => {

@@ -14,12 +14,13 @@ export const handleError = (error: unknown): ErrorResponse => {
       message: message || '서버 오류가 발생했습니다.',
     };
   }
-  console.error(error);
+
   toast.warn(`500 서버에러\n 알 수 없는 오류가 발생했습니다.`);
+
   return {
     status: 500,
     code: 500,
-    message: '알 수 없는 오류가 발생했습니다.',
+    message: error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.',
   };
 };
 
