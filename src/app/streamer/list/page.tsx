@@ -90,7 +90,7 @@ export default function List() {
   const channelId = useChannelStore((state) => state.channelId);
   const isTokenLoading = useAuthStore((state) => state.isRehydrated);
   const [isSessionOn, setIsSessionOn] = useState<SessionStatus>(SessionStatus.INITIAL);
-  const [isSessionOpen, setIsSessionOpen] = useState(true);
+  const [isSessionOpen, setIsSessionOpen] = useState(false);
 
   const [menu, setMenu] = useState(0); // 0 전체인원 1/고정인원/2현재인원
   const router = useRouter();
@@ -157,25 +157,21 @@ export default function List() {
 
   useEffect(() => {
     if (currentParticipants) {
-      queryClient.setQueryData<InfiniteParticipantsData>(
-        ['participants'],
-        (oldData: InfiniteParticipantsData | undefined) => {
-          console.log('currentParticipants', currentParticipants);
-          if (currentParticipants.length === 0) {
-            return {
-              pages: [{ participants: currentParticipants, nextPage: undefined }],
-              pageParams: [0],
-            };
-          }
-          if (!oldData) return;
-
-          // ✅ 4. 전체를 하나의 페이지로 다시 구성
+      queryClient.setQueryData<InfiniteParticipantsData>(['participants'], () => {
+        console.log('currentParticipants', currentParticipants);
+        if (currentParticipants.length === 0) {
           return {
             pages: [{ participants: currentParticipants, nextPage: undefined }],
             pageParams: [0],
           };
-        },
-      );
+        }
+
+        // ✅ 4. 전체를 하나의 페이지로 다시 구성
+        return {
+          pages: [{ participants: currentParticipants, nextPage: undefined }],
+          pageParams: [0],
+        };
+      });
     }
   }, [currentParticipants, queryClient]);
 
@@ -365,9 +361,8 @@ export default function List() {
       isSessionOn !== SessionStatus.CLOSED &&
       !isSessionError &&
       !isProcessing &&
-      isSessionOpen // 이 조건 추가
+      !isSessionOpen // 이 조건 추가
     ) {
-      if (isSessionOpen) return;
       console.log('🔄 SSE 자동 시작');
       const url = makeUrl({ accessToken, sessionCode: sessionInfo?.sessionCode });
       startSSE(url);

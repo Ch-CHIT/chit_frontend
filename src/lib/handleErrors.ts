@@ -7,6 +7,9 @@ export const handleError = (error: unknown): ErrorResponse => {
   if (error instanceof CustomError) {
     const { code, status, message } = error;
 
+    if (code === 43002) {
+      return;
+    }
     toast.warn(`${error.message}`);
     return {
       status,
