@@ -2,6 +2,7 @@ import LogoutConfirmModal from '@/components/molecules/LogoutConfirmModal';
 import useLogout from '@/hooks/useLogout';
 import useParamsParser from '@/hooks/useParamsParser';
 import { logout } from '@/services/auth/auth';
+import { deleteContentsSession } from '@/services/streamer/streamer';
 import useAuthStore from '@/store/authStore';
 import useChannelStore from '@/store/channelStore';
 import Image from 'next/image';
@@ -22,21 +23,30 @@ const BtnUserProfile = () => {
     const userRole = role;
     setIsOpen(false);
     console.log('🔴 BtnUserProfile: 로그아웃 요청', accessToken);
+
     if (accessToken) {
       console.log('🔴 BtnUserProfile: 로그아웃 요청', accessToken);
-      await logout({ accessToken }).then(() => {
-        resetLocal();
-        router.refresh();
-        if (userRole === 'STREAMER') {
-          router.push(`/`);
-        } else {
-          router.push(`/viewer/${channelId}/${sessionCode}`);
-        }
-      });
+      await logout({ accessToken })
+        .then(() => {
+          if (userRole === 'STREAMER') {
+            deleteContentsSession(accessToken);
+          }
+        })
+        .then(() => {
+          console.log('🔴 BtnUserProfile: 로그아웃 성공');
+
+          resetLocal();
+          router.refresh();
+          if (userRole == 'STREAMER') {
+            router.push(`/`);
+          } else {
+            router.push(`/viewer/${channelId}/${sessionCode}`);
+          }
+        });
     } else {
       resetLocal();
       router.refresh();
-      if (userRole === 'STREAMER') {
+      if (userRole == 'STREAMER') {
         router.push(`/`);
       } else {
         router.push(`/viewer/${channelId}/${sessionCode}`);

@@ -46,6 +46,8 @@ export const logout = async ({ accessToken }: RequestLogout) => {
         withCredentials: true,
       }, // ✅ 쿠키 보내려면 이거 필요,
     );
+    console.log('logout response');
+    console.log(accessToken);
     console.log(response);
     if (response.status == 200) {
       await fetch('/api/auth/', {

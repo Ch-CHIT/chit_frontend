@@ -15,4 +15,5 @@ export type ResponseLoginWithOAuth2 =
 
 export type RequestLogout = {
   accessToken: string;
+  isSessionOpen?: boolean;
 };
