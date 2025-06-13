@@ -32,7 +32,7 @@ export default function Home() {
   // 채널 ID가 없을 경우 로그인 페이지로 리다이렉트
 
   const redirectToLogin = useCallback(() => {
-    console.log('채널 ID가 없습니다. 로그인 페이지로 리다이렉트합니다.');
+    console.warn('채널 ID가 없습니다. 로그인 페이지로 리다이렉트합니다.');
     router.replace('/login');
     return;
   }, [router]);

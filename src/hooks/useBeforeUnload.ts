@@ -6,7 +6,6 @@ const useBeforeUnload = () => {
   useEffect(() => {
     const handleExit = (event: BeforeUnloadEvent) => {
       event.preventDefault();
-      console.log("🚀 사용자가 'Yes'를 선택하여 페이지를 떠남. sessionStorage 비우기 실행!");
       sessionStorage.removeItem(STORAGE_KEYS.SSEStorageKey);
 
       // ✅ 일부 브라우저에서만 필요한 레거시 코드

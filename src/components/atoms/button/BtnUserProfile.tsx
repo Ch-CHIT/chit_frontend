@@ -22,10 +22,8 @@ const BtnUserProfile = () => {
   const handleLogout = async () => {
     const userRole = role;
     setIsOpen(false);
-    console.log('🔴 BtnUserProfile: 로그아웃 요청', accessToken);
 
     if (accessToken) {
-      console.log('🔴 BtnUserProfile: 로그아웃 요청', accessToken);
       await logout({ accessToken })
         .then(() => {
           if (userRole === 'STREAMER') {
@@ -33,8 +31,6 @@ const BtnUserProfile = () => {
           }
         })
         .then(() => {
-          console.log('🔴 BtnUserProfile: 로그아웃 성공');
-
           resetLocal();
           router.refresh();
           if (userRole == 'STREAMER') {
@@ -61,7 +57,7 @@ const BtnUserProfile = () => {
   useEffect(() => {}, [isLogin]);
 
   if (!isRehydrated || !isLogin) {
-    console.log('🔴 BtnUserProfile: isRehydrated가 아닙니다.');
+    console.warn('🔴 BtnUserProfile: isRehydrated가 아닙니다.');
     return <div></div>;
   }
 

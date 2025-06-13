@@ -6,13 +6,11 @@ const useDetectExit = (onExit: () => void) => {
 
   useEffect(() => {
     const handlePageHide = (event: PageTransitionEvent) => {
-      console.log('pageHide 이벤트 발생', event.persisted); //사용자가 탭을 전환하거나 백그라운드로 이동하면 발생
       if (!event.persisted) {
         if (!isRefresh.current) {
           alert('⚠️ 경고: 창을 닫으시겠습니까?');
           onExit();
         } else {
-          console.log('tab 전환');
         }
       }
     };

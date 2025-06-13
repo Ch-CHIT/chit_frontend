@@ -111,7 +111,6 @@ export default function List() {
         size: 10,
       });
       if (response.success) {
-        console.log('fetchParticipantsData', response.data);
         return response.data;
       }
       return {
@@ -158,7 +157,6 @@ export default function List() {
   useEffect(() => {
     if (currentParticipants) {
       queryClient.setQueryData<InfiniteParticipantsData>(['participants'], () => {
-        console.log('currentParticipants', currentParticipants);
         if (currentParticipants.length === 0) {
           return {
             pages: [{ participants: currentParticipants, nextPage: undefined }],
@@ -180,7 +178,6 @@ export default function List() {
     return () => {
       // 언마운트 시 false로
       if (nextPath === '/settings') {
-        console.log('✅ /settings 이동 → cleanup 생략');
         setNextPath(null); // 다음 경로 초기화
         return;
       }
@@ -330,7 +327,7 @@ export default function List() {
   useEffect(() => {
     const handleError = () => {
       if (isSessionError && isProcessing && isSessionOn !== SessionStatus.CLOSED) {
-        console.log('🚨 세션 에러 발생 - SSE 중지 및 홈으로 이동');
+        console.warn('🚨 세션 에러 발생 - SSE 중지 및 홈으로 이동');
         try {
           resetSSEStore();
           resetContentsSession();
@@ -379,7 +376,6 @@ export default function List() {
     isSessionOpen, // 이거 추가
   ]);
 
-  console.log(participants);
   if (!isTokenLoading) return <div>로딩중입니다.</div>;
   return (
     <CommonLayout>

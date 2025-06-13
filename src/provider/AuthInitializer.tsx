@@ -8,22 +8,16 @@ export default async function AuthInitializer() {
   const REFRESH_TOKEN = cookieStore.get('REFRESH_TOKEN')?.value;
   let accessToken = null;
   if (REFRESH_TOKEN && !accessToken) {
-    console.log('🔴 refreshToken 있음');
-
     const response = await postRefresh({ refreshToken: REFRESH_TOKEN });
 
     if (response.success) {
-      console.log('🔵 refreshToken 재발급 성공');
       accessToken = response.data;
-      console.log('debug : refreshToken 재발급');
       return <AuthInitializerClient accessToken={accessToken} />;
     } else {
-      console.log('🔴 refreshToken 재발급 실패');
+      console.warn('🔴 refreshToken 재발급 실패');
       return <AuthInitializerClient accessToken={null} />;
     }
   } else {
-    console.log('🔴 refreshToken 없음');
-
     return <AuthInitializerClient accessToken={null} />;
   }
 }

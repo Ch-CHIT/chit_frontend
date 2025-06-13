@@ -138,11 +138,10 @@ export const useSSEStore = create<SSEState>()(
       stopSSE: () => {
         set((state) => {
           if (state.eventSource) {
-            console.log('SSE연결을 종료합니다.');
             try {
               state.eventSource.close();
             } catch (isSessionError) {
-              console.log('SSE 종료 중 오류 발생:', isSessionError);
+              console.warn('SSE 종료 중 오류 발생:', isSessionError);
             }
           }
           const manager = get().participantManager;
@@ -159,19 +158,16 @@ export const useSSEStore = create<SSEState>()(
       },
       startSSE: (url, data) => {
         if (get().isConnected) {
-          console.log('⚠️ SSE가 연결되어 있음. 중복 구독 방지 요청 종료');
+          console.warn('⚠️ SSE가 연결되어 있음. 중복 구독 방지 요청 종료');
           get().stopSSE(); // 기존 SSE 연결 종료
         }
-        console.log('🆕 새로운 SSE연결 시작');
 
         const manager = new ParticipantManager(data);
         set({ isProcessing: true });
 
-        console.log('새로운 SSE연결 시작');
         const newEventSource = new EventSource(url);
 
-        newEventSource.onopen = (event) => {
-          console.log('연결성공메세지 수신', event);
+        newEventSource.onopen = () => {
           set({
             isConnected: true,
             isSessionError: false,
@@ -192,7 +188,6 @@ export const useSSEStore = create<SSEState>()(
             switch (eventType) {
               // ✅ 공통 세션 참가 이벤트
               case SSEEventType.JOINED_SESSION: //시청자에게 발생생\
-                console.log('📩 세션참가이벤트:', eventData);
                 if (eventData) newState.sessionCode = eventData;
                 break;
 
@@ -240,10 +235,7 @@ export const useSSEStore = create<SSEState>()(
                   totalParticipants: currentParticipants,
                 };
 
-                console.log('📩 참가자 세션 종료 이벤트 발생');
-                console.log('삭제 전', manager.getAllParticipants());
                 manager.removeParticipant(removedParticipant.participantId);
-                console.log('삭제 후', manager.getAllParticipants());
                 newState.currentParticipants = manager.getAllParticipants();
                 break;
               }
@@ -273,10 +265,8 @@ export const useSSEStore = create<SSEState>()(
               }
 
               case SSEEventType.CALLED_NEXT_PARTY: {
-                console.log('📩 다음 파티 호출 이벤트 수신:', eventData);
                 const limitPerGroup = get().contentsSessionInfo?.maxGroupParticipants || 1;
                 manager.sendTopNToLastRound(limitPerGroup);
-                console.log(limitPerGroup, manager.getAllParticipants());
                 newState.currentParticipants = manager.getAllParticipants();
 
                 break;
@@ -292,7 +282,6 @@ export const useSSEStore = create<SSEState>()(
               }
 
               case SSEEventType.LEFT_SESSION: {
-                console.log('📩 참가자 세션 종료 이벤트 발생');
                 get().stopSSE(); // 기존 stopSSE 함수 호출하여 안전하게 종료
                 set({
                   viewerSessionInfo: null,
@@ -302,7 +291,6 @@ export const useSSEStore = create<SSEState>()(
               }
 
               case SSEEventType.KICKED_SESSION: {
-                console.log('📩 참가자 세션 강퇴 이벤트 발생');
                 get().stopSSE(); // 기존 stopSSE 함수 호출하여 안전하게 종료
                 set({
                   viewerSessionInfo: null,
@@ -312,7 +300,6 @@ export const useSSEStore = create<SSEState>()(
               }
 
               default:
-                console.log('📩 세션 이벤트 수신:', eventData);
             }
 
             set(newState); // 상태 업데이트
@@ -321,7 +308,7 @@ export const useSSEStore = create<SSEState>()(
 
         //자동재연경, backOff로직
         newEventSource.onerror = (isSessionError) => {
-          console.log('❌ SSE 오류 발생 - 재연결 시도 예정', isSessionError);
+          console.warn('❌ SSE 오류 발생 - 재연결 시도 예정', isSessionError);
           newEventSource.close();
           get().stopSSE();
           set({

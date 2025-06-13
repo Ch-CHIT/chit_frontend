@@ -29,7 +29,6 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
   const fetchMyData = useCallback(async (viewerChannelId: string) => {
     const response = await postStreamerInfo(viewerChannelId);
     if (response) {
-      console.log('Viewer data fetched successfully:', response);
     }
     return response;
   }, []);
@@ -45,7 +44,6 @@ export default function LoginClientPage({ code, state, role }: LoginClientPagePr
     [navAccessToken, setAccessToken],
   );
 
-  console.log(code, state, role);
   useEffect(() => {
     if (!isRehydrated) return;
     if (isLogin) return;

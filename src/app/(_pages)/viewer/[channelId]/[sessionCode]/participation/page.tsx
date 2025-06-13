@@ -30,7 +30,6 @@ export default function Settings() {
 
   const onCompleteViewerNickname = () => {
     const isOpen = fetchSessionStatus();
-    console.log('isOpen:', isOpen);
     if (accessToken && viewerGameNickname && isOpen) {
       setViewerNickname(viewerGameNickname);
       toast.success('시참에 참여했습니다. 조금만 기다려주세요!');

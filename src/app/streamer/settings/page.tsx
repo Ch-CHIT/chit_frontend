@@ -73,10 +73,9 @@ export default function Settings() {
     }
     if (isSession && accessToken) {
       heartBeat(accessToken, sessionCode);
-      console.log('🔵 하트비트 체크 시작', accessToken, sessionCode);
+      console.debug('🔵 하트비트 체크 시작', accessToken, sessionCode);
       const intervalId = setInterval(() => {
         heartBeat(accessToken, sessionCode);
-        console.log('두근');
       }, 10000); // 10초
 
       return () => {

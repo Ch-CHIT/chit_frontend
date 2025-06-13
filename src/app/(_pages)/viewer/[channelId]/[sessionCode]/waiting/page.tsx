@@ -39,7 +39,6 @@ export default function Page() {
 
   //시참 종료 버튼 클릭 시
   const onClickSessionCloseHandler = async () => {
-    console.log('🛑세션종료');
     if (sessionCode && accessToken) {
       const response = await deleteContentsSessionViewerLeave({
         accessToken,

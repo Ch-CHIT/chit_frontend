@@ -82,7 +82,6 @@ export const heartBeatViewer = async (accessToken: string, sessionCode: string) 
         Authorization: `Bearer ${accessToken}`, // accessToken을 Bearer 토큰으로 추가
       },
     });
-    console.log('heartBeat');
     return response.data; // 성공적인 응답 데이터 반환
   } catch (error: unknown) {
     return handleError(error); // 에러 핸들링 함수 사용

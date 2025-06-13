@@ -46,9 +46,7 @@ export const logout = async ({ accessToken }: RequestLogout) => {
         withCredentials: true,
       }, // ✅ 쿠키 보내려면 이거 필요,
     );
-    console.log('logout response');
-    console.log(accessToken);
-    console.log(response);
+
     if (response.status == 200) {
       await fetch('/api/auth/', {
         method: 'GET',
@@ -75,15 +73,14 @@ export const postRefresh = async ({
       },
       credentials: 'include',
     }); // 원하는 API 호출s
-    console.log('refres hFECTH');
-    console.log(response);
+
     const data = await response.json();
     if (response.status == 200) {
       return { success: true, data: data.data };
     }
     return { success: false, error: data.error };
   } catch (error: unknown) {
-    console.log(error);
+    console.warn(error);
     return { success: false, error: error as ErrorResponse }; // 에러 핸들링 함수 사용
   }
 };

@@ -8,11 +8,6 @@ export default function AuthInitializerClient({ accessToken }: { accessToken: st
   const { setAccessToken, isRehydrated } = useAuthStore((state) => state);
 
   //새로고침시에 불러오기
-
-  useEffect(() => {
-    console.log('✅ Init triggered');
-  }, []);
-
   useEffect(() => {
     if (accessToken) {
       setAccessToken(accessToken);
