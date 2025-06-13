@@ -5,56 +5,37 @@ import { useSSEStore } from '@/store/sseStore';
 import useAuthStore from '@/store/authStore';
 import useParamsParser from '@/hooks/useParamsParser';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'react-toastify';
 import BtnWithChildren from '@/components/atoms/button/BtnWithChildren';
 import CategoryText from '@/components/atoms/text/CategoryText';
 import HintText from '@/components/atoms/text/HintText';
 import ViewerPageLayout from '@/components/layout/ViewerPageLayout';
 import Input from '@/components/atoms/input/Input';
-import { getContentsSessionStatus } from '@/services/streamer/streamer';
+import { useSessionStatus } from './../../../../../../hooks/useSessionStatus';
 
-export default function Settings() {
-  const [viewerGameNickname, setGameNickname] = useState('');
+export default function Participation() {
+  const [viewerGameNickname, setViewerGameNickname] = useState('');
   const { sessionCode, channelId } = useParamsParser();
   const router = useRouter();
   const { setViewerNickname } = useSSEStore();
   const streamerInfo = useChannelStore((state) => state.streamerInfo);
-  const [isSessionOpen, setIsSessionOpen] = useState(true);
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const { isSessionOpen, fetchSessionStatus } = useSessionStatus(channelId, accessToken);
 
   const onChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setGameNickname(e.target.value);
+    setViewerGameNickname(e.target.value);
   };
 
-  const accessToken = useAuthStore((state) => state.accessToken);
+  const isViewerNicknameValid = (nickname: string) => nickname.trim().length > 0;
 
-  const onCompleteViewerNickname = () => {
-    const isOpen = fetchSessionStatus();
-    if (accessToken && viewerGameNickname && isOpen) {
-      setViewerNickname(viewerGameNickname);
-      toast.success('시참에 참여했습니다. 조금만 기다려주세요!');
+  const handleSubmit = async () => {
+    if (!isViewerNicknameValid || !isSessionOpen) return;
 
-      router.replace(`waiting`);
-    } else {
-      toast.warn('아직 시참이 열리지 않았습니다. 잠시후 다시 시도해주세요');
-    }
+    setViewerNickname(viewerGameNickname);
+    toast.success('시참에 참여했습니다. 조금만 기다려주세요!');
+    router.replace(`waiting`);
   };
-
-  const fetchSessionStatus = useCallback(async () => {
-    if (!channelId && !accessToken) return;
-
-    const response = await getContentsSessionStatus(channelId, accessToken);
-    if (response.success) {
-      const { isOpen } = response.data;
-      setIsSessionOpen(isOpen);
-
-      return isOpen;
-    }
-  }, [accessToken, channelId]);
-
-  useEffect(() => {
-    fetchSessionStatus();
-  }, [fetchSessionStatus]);
 
   if (!streamerInfo) {
     router.replace(`${channelId}/${sessionCode}`);
@@ -82,6 +63,7 @@ export default function Settings() {
             </div>
             <Input
               type="text"
+              value={viewerGameNickname}
               onChange={onChangeInput}
               name="gameNickname"
               placeholder="여기에 게임닉네임을 입력해 주세요"
@@ -89,10 +71,17 @@ export default function Settings() {
             <HintText>* 등록한 닉네임은 나중에 수정할 수 있어요</HintText>
           </div>
         </section>
-        {/* todo : state에 따라 닉네임 상태 분리하기  */}
+        {!isSessionOpen && (
+          <div
+            className="mb-2 flex w-full cursor-pointer items-center justify-center text-bold-small text-hint"
+            onClick={() => fetchSessionStatus()}
+          >
+            시참 상태 다시 불러오기
+          </div>
+        )}
         <BtnWithChildren
-          onClickHandler={onCompleteViewerNickname}
-          type={viewerGameNickname.length > 0 && isSessionOpen ? 'default' : 'disable'}
+          onClickHandler={handleSubmit}
+          type={isViewerNicknameValid && isSessionOpen ? 'default' : 'disable'}
         >
           {!isSessionOpen ? '아직 시참이 열리지 않았어요' : '닉네임 다 입력했어요'}
         </BtnWithChildren>

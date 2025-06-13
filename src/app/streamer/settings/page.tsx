@@ -1,40 +1,42 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+
+import useChannelStore from '@/store/channelStore';
+import useContentsSessionStore from '@/store/sessionStore';
+import { useSSEStore } from '@/store/sseStore';
+import useAuthStore from '@/store/authStore';
+import { heartBeat } from '@/services/common/common';
+import useDetectExit from '@/hooks/useDetectExit';
+import { createContentsSession, updateContentsSession } from '@/services/streamer/streamer';
+
 import Minus from '../../../../public/assets/icons/Minus';
 import Plus from '../../../../public/assets/icons/Plus';
 import { BtnSubmit } from '@/components/atoms/button/BtnWithChildren';
 import { InputPassword } from '@/components/atoms/input/Input';
 import CategoryText from '@/components/atoms/text/CategoryText';
 import CommonLayout from '@/components/layout/CommonLayout';
-import useDetectExit from '@/hooks/useDetectExit';
-import { createContentsSession, updateContentsSession } from '@/services/streamer/streamer';
-import useChannelStore from '@/store/channelStore';
-import useContentsSessionStore from '@/store/sessionStore';
-import { useSSEStore } from '@/store/sseStore';
-import useAuthStore from '@/store/authStore';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
-import { heartBeat } from '@/services/common/common';
+import { logout } from '@/services/auth/auth';
 
 export default function Settings() {
-  const [maxGroupParticipants, setmaxGroupParticipants] = useState(1);
   const router = useRouter();
-  const { eventSource, sessionCode, isRehydrated: sseRehydrated } = useSSEStore((state) => state);
-  const accessToken = useAuthStore((state) => state.accessToken);
-  const { streamerInfo } = useChannelStore((state) => state);
   const {
     setSessionInfo,
     setIsSession,
     isSession,
     isRehydrated: contentsRehydrated,
   } = useContentsSessionStore((state) => state);
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const { streamerInfo } = useChannelStore((state) => state);
+  const { eventSource, sessionCode, isRehydrated: sseRehydrated } = useSSEStore((state) => state);
+  const [maxGroupParticipants, setmaxGroupParticipants] = useState(1);
 
   //브라우저 종료시 실행되는 콜백 함수
   const handleExit = async () => {
     if (eventSource) {
-      // await logout({ accessToken });
-      //로그아웃 api 쓰기
+      await logout({ accessToken });
     }
   };
 
